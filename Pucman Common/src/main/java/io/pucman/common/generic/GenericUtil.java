@@ -27,6 +27,15 @@ public final class GenericUtil
         return false;
     }
 
+    public static <T> boolean caseable(Object o, Class<T> clazz)
+    {
+        try {
+            T t = (T) o;
+            return true;
+        } catch (ClassCastException ingore) {}
+        return false;
+    }
+
     /**
      * Casts an object to the generic type.
      * @param o - object.
