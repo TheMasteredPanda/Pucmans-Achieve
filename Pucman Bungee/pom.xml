@@ -11,9 +11,6 @@
 
     <artifactId>pucman-bungee</artifactId>
 
-
-
-
     <repositories>
         <repository>
             <id>spigot-repo</id>
@@ -42,6 +39,7 @@
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
             <version>1.12-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

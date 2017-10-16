@@ -6,12 +6,14 @@
 
     <groupId>net.legendaryhosts.pucman</groupId>
     <artifactId>pucman-parent</artifactId>
+    <packaging>pom</packaging>
     <version>1.0</version>
 
 
     <modules>
         <module>Pucman Common</module>
         <module>Pucman Bungee</module>
+        <module>Pucman Server</module>
     </modules>
 
     <dependencies>
