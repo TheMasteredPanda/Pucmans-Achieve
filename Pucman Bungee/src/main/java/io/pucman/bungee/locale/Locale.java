@@ -10,6 +10,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -24,6 +25,7 @@ import java.util.LinkedList;
  * the plugin, let alone the server.
  * @param <P> - the plugin instance.
  */
+@ParametersAreNonnullByDefault
 public class Locale<P extends Plugin> extends BaseFile
 {
     /**
@@ -80,7 +82,7 @@ public class Locale<P extends Plugin> extends BaseFile
      * @param clazz - the class.
      */
     @Override
-    public void popluate(Class<?> clazz)
+    public void populate(Class<?> clazz)
     {
         for (Field f : clazz.getFields()) {
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {

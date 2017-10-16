@@ -1,11 +1,13 @@
 package io.pucman.bungee.command;
 
 import com.google.common.collect.Maps;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 
 @RequiredArgsConstructor
+@Getter
 public class CommandResponse
 {
     private final Type type;

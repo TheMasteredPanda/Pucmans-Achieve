@@ -1,14 +1,25 @@
 package io.pucman.bungee.command;
 
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListenableFuture;
+import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.file.ConfigPopulate;
+import io.pucman.bungee.locale.Format;
+import io.pucman.bungee.locale.Locale;
+import io.pucman.bungee.sender.Sender;
+import io.pucman.common.exception.TrySupplier;
+import io.pucman.common.exception.TryUtil;
+import io.pucman.common.math.NumberUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -31,15 +42,14 @@ import java.util.stream.Collectors;
  *
  * @see AsynchronousState
  * @see this#execute(CommandSender, LinkedList)
- * @see this#onSuccess(CommandSender, LinkedList)
- * @see this#onFailure(CommandSender, LinkedList)
+ * @see this#onSuccess(CommandSender, Map, LinkedList)
+ * @see this#onFailure(CommandSender, Map, LinkedList)
  *
  * ArgumentField is a class that holds the name of the argument field and it's default value.
  * Argument fields that have their default value assigned to a non-null object will be treated
  * as required argument fields, fields that are required in order for the command to run.
  *
  */
-//TODO
 public abstract class PucmanCommand extends Command
 {
     /**
@@ -69,12 +79,21 @@ public abstract class PucmanCommand extends Command
     @Getter
     private LinkedList<ArgumentField> requiredArgumentFields = Lists.newLinkedList();
 
+    /**
+     * Command description.
+     */
     @Getter
     private String description;
 
+    /**
+     * If true, it is a player only command, otherwise both the console and player can execute it.
+     */
     @Getter
     private boolean playerOnlyCommand;
 
+    /**
+     * Asynchronous state, cannot be null.
+     */
     @Getter
     private AsynchronousState state;
 
@@ -90,6 +109,9 @@ public abstract class PucmanCommand extends Command
     @ConfigPopulate(value = "NotEnoughArguments", format = true)
     private String NOT_ENOUGH_ARGUMENTS;
 
+    @ConfigPopulate(value = "IncorrectArgumentInput", format = true)
+    public String INCORRECT_ARGUMENT_INPUT;
+
     @ConfigPopulate(value = "ParentCommandHeader", color = true)
     private String PARENT_COMMAND_HEADER;
 
@@ -98,6 +120,14 @@ public abstract class PucmanCommand extends Command
 
     @ConfigPopulate(value = "CommandEntry", color = true)
     private String COMMAND_ENTRY;
+
+    /**
+     * Instance of the command manager.
+     *
+     * @see CommandManager
+     */
+    private CommandManager manager = PLibrary.get().get(CommandManager.class);
+
 
     /**
      * Main constructor to this wrapper, contains all the necessary information.
@@ -109,9 +139,10 @@ public abstract class PucmanCommand extends Command
      * @param asynchronousState - the asynchronous state of this command, described above.
      * @param aliases - the aliases of this command.
      */
-    public PucmanCommand(@NonNull String name, String permission, String description, boolean playerOnlyCommand, @NonNull AsynchronousState asynchronousState, String... aliases)
+    public PucmanCommand(@NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, @NonNull AsynchronousState asynchronousState, String... aliases)
     {
         super(name, permission, aliases);
+        locale.populate(this.getClass());
 
         if (description != null) {
             this.description = description;
@@ -121,14 +152,14 @@ public abstract class PucmanCommand extends Command
         this.state = asynchronousState;
     }
 
-    public PucmanCommand(String name, String description, boolean playerOnlyCommand, AsynchronousState state)
+    public PucmanCommand(Locale locale, String name, String description, boolean playerOnlyCommand, AsynchronousState state)
     {
-        this(name, null, description, playerOnlyCommand, state);
+        this(locale, name, null, description, playerOnlyCommand, state);
     }
 
-    public PucmanCommand(String name, String description, AsynchronousState state)
+    public PucmanCommand(Locale locale, String name, String description, AsynchronousState state)
     {
-        this(name, null, description, false, state);
+        this(locale, name, null, description, false, state);
     }
 
     public void arguments(ArgumentField... fields)
@@ -137,6 +168,10 @@ public abstract class PucmanCommand extends Command
         this.requiredArgumentFields = this.argumentFields.stream().filter(field -> field.getDef() != null).collect(Collectors.toCollection(Lists::newLinkedList));
     }
 
+    /**
+     * For adding parent commands.
+     * @param commands - commands.
+     */
     public void addParentCommands(PucmanCommand... commands)
     {
         for (PucmanCommand command : commands) {
@@ -147,11 +182,20 @@ public abstract class PucmanCommand extends Command
         }
     }
 
+    /**
+     * Checking if a command is a parent command.
+     * @param command - command to check.
+     * @return if if is a parent command of this class it will return true, else false.
+     */
     public boolean isParentCommand(PucmanCommand command)
     {
         return this.parentCommands.contains(command);
     }
 
+    /**
+     * For adding child commands.
+     * @param commands - commands
+     */
     public void addChildCommands(PucmanCommand... commands)
     {
         for (PucmanCommand command : commands) {
@@ -162,25 +206,189 @@ public abstract class PucmanCommand extends Command
         }
     }
 
+    /**
+     * Checking if a command is a child command.
+     * @param command - command to check.
+     * @return if it is a child command of this class it will return true, else false.
+     */
     public boolean isChildCommand(PucmanCommand command)
     {
         return this.childCommands.contains(command);
     }
 
+    /**
+     * Check if the command is an alias of this command.
+     * @param alias - alias to check.
+     * @return true if it is, else false.
+     */
     public boolean isAlias(String alias)
     {
-        return Arrays.asList(this.getAliases()).contains(alias);
+        return Arrays.asList(this.getAliases()).contains(alias) || alias.equals(this.getName());
     }
 
+    /**
+     * To check if the player has the permission to execute this command.
+     * @param sender - the sender.
+     * @return true if they that have permission, else false.
+     */
     public boolean hasPermission(CommandSender sender)
     {
         return this.getPermission() != null || sender.hasPermission(this.getPermission());
     }
 
-    @Override
-    public void execute(CommandSender commandSender, String[] strings)
+    /**
+     * For checking if an argument field is required.
+     *
+     * @see ArgumentField
+     * @param field - field to check.
+     * @return true if required, else false.
+     */
+    public boolean isRequiredArgumentField(ArgumentField field)
     {
+        return this.requiredArgumentFields.contains(field);
+    }
 
+    /**
+     * To generate the command path of this command. This generates the full path of the command.
+     * For example:
+     * /parentcommand thiscommand
+     * @return the command path.
+     */
+    public String getCommandPath()
+    {
+        StringBuilder sb = new StringBuilder("/");
+
+        for (PucmanCommand parent : this.parentCommands) {
+            sb.append(parent.getName());
+
+            if (parent != this.parentCommands.getLast()) {
+                sb.append(" ");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Generates the command usage. This takes the command path and adds all argument fields to the
+     * command. For example:
+     * /parentcommand thiscommand <argument1> [argument2] [argument3]
+     * @return the command usage;
+     */
+    public String getCommandUsage()
+    {
+        StringBuilder sb = new StringBuilder(this.getCommandPath()).append(" ");
+
+        for (ArgumentField field : this.argumentFields) {
+            sb.append(this.isRequiredArgumentField(field) ? "<" : "[").append(field.getName()).append(this.isRequiredArgumentField(field) ? ">" : "]");
+
+            if (field != this.argumentFields.getLast()) {
+                sb.append(" ");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Body of BungeeCord command.
+     * @param sender - sender.
+     * @param args - arguments.
+     */
+    @Override
+    public void execute(CommandSender sender, String[] args)
+    {
+        if (!this.isAlias(args[0])) {
+            return;
+        }
+
+        if (this.isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
+            Sender.sender(sender, this.PLAYER_ONLY_COMMAND);
+            return;
+        }
+
+        if (!this.hasPermission(sender)) {
+            Sender.sender(sender, this.NO_PERMISSION);
+            return;
+        }
+
+        if (args.length > 1) {
+            if (args[0].equalsIgnoreCase("help")) {
+                LinkedList<String> content = Lists.newLinkedList();
+                content.add(this.PARENT_COMMAND_HEADER.replace("{commandusage}", this.getCommandUsage()).replace("{commanddescrption}", this.getDescription()));
+
+                if (this.childCommands.size() > 0) {
+                    content.add(this.CHILD_COMMAND_HEADER);
+
+                    for (PucmanCommand child : this.childCommands) {
+                        content.add(this.COMMAND_ENTRY.replace("{commandusage}", child.getCommandPath()).replace("{commanddescription}", child.getDescription()));
+                    }
+                }
+
+                LinkedListMultimap<Integer, String> pages = Format.paginate(String.class, content, null, null, 5);
+
+                if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
+                    Sender.sender(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
+                } else {
+                    Sender.sender(sender, pages.get(1));
+                }
+
+                return;
+            }
+
+            for (PucmanCommand child : this.parentCommands) {
+                if (!child.isAlias(args[0])) {
+                    continue;
+                }
+
+                LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
+                newArgs.remove(args[0]);
+                child.execute(sender, newArgs.toArray(new String[newArgs.size()]));
+                return;
+            }
+
+            if (args.length - 1 < this.getRequiredArgumentFields().size()) {
+                Sender.sender(sender, this.NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", this.getCommandUsage()));
+                return;
+            }
+
+            LinkedList<String> newArgs = Lists.newLinkedList();
+            newArgs.remove(args[0]);
+
+            switch (this.state) {
+                case FULL: {
+                    ListenableFuture<CommandResponse> fullFuture = this.manager.service.submit(() -> this.execute(sender, newArgs));
+                    CommandResponse fullResponse = TryUtil.sneaky((TrySupplier<CommandResponse>) fullFuture::get);
+                    fullFuture.addListener(() -> {
+                        if (fullResponse.getType() == CommandResponse.Type.SUCCESS) {
+                            this.onSuccess(sender, fullResponse.getData(), newArgs);
+                        } else {
+                            this.onFailure(sender, fullResponse.getData(), newArgs);
+                        }
+                    }, this.manager.service);
+                    return;
+                }
+                case SEMI: {
+                    ListenableFuture<CommandResponse> semiFuture = this.manager.service.submit(() -> this.execute(sender, newArgs));
+                    CommandResponse semiResponse = TryUtil.sneaky((TrySupplier<CommandResponse>) semiFuture::get);
+                    if (semiResponse.getType() == CommandResponse.Type.SUCCESS) {
+                        this.onSuccess(sender, semiResponse.getData(), newArgs);
+                    } else {
+                        this.onFailure(sender, semiResponse.getData(), newArgs);
+                    }
+                    return;
+                }
+                case NONE: {
+                    CommandResponse noneResponse = this.execute(sender, newArgs);
+
+                    if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
+                        this.onSuccess(sender, noneResponse.getData(), newArgs);
+                    } else {
+                        this.onFailure(sender, noneResponse.getData(), newArgs);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -188,7 +396,7 @@ public abstract class PucmanCommand extends Command
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public abstract void execute(CommandSender sender, LinkedList<String> parameters);
+    public abstract CommandResponse execute(CommandSender sender, LinkedList<String> parameters);
 
     /**
      * If the commands body returns a failed command response, this part of the command
@@ -196,7 +404,7 @@ public abstract class PucmanCommand extends Command
      * @param sender - the seconder of the command
      * @param parameters - the parameters.
      */
-    public abstract void onFailure(CommandSender sender, LinkedList<String> parameters);
+    public abstract void onFailure(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters);
 
     /**
      * If the commands body returns a successful command response, this part of the command
@@ -204,5 +412,5 @@ public abstract class PucmanCommand extends Command
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public abstract void onSuccess(CommandSender sender, LinkedList<String> parameters);
+    public abstract void onSuccess(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters);
 }

@@ -58,7 +58,7 @@ public class BaseFile
      * Populates fields within the class with the value corresponding to the key set in the ConfigPopulate annotation.
      * @param clazz - the class.
      */
-    public void popluate(Class<?> clazz)
+    public void populate(Class<?> clazz)
     {
         for (Field f : clazz.getFields()) {
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {
