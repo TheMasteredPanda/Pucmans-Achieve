@@ -110,7 +110,7 @@ public abstract class PucmanCommand extends Command
     private String NOT_ENOUGH_ARGUMENTS;
 
     @ConfigPopulate(value = "IncorrectArgumentInput", format = true)
-    public String INCORRECT_ARGUMENT_INPUT;
+    protected String INCORRECT_ARGUMENT_INPUT;
 
     @ConfigPopulate(value = "ParentCommandHeader", color = true)
     private String PARENT_COMMAND_HEADER;
@@ -162,6 +162,10 @@ public abstract class PucmanCommand extends Command
         this(locale, name, null, description, false, state);
     }
 
+    /**
+     * To add argument fields to this command.
+     * @param fields - the argument fields.
+     */
     public void arguments(ArgumentField... fields)
     {
         this.argumentFields.addAll(Arrays.asList(fields));

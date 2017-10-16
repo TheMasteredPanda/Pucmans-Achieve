@@ -17,12 +17,25 @@ import java.util.concurrent.Executors;
 @ParametersAreNonnullByDefault
 public class CommandManager extends Manager<PLibrary>
 {
+    /**
+     * Used for asynchronous execution of the three bodies in the command wrapper.
+     *
+     * @see PucmanCommand
+     */
     protected ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+
+
     public CommandManager(PLibrary instance)
     {
         super(instance, Priority.HIGH);
     }
 
+    /**
+     * To register commands.
+     * @param instance - the instance of the plugin the command is written for.
+     * @param commands - the command array.
+     * @param <P> - the plugin generic type.
+     */
     public <P extends Plugin> void register(P instance, PucmanCommand... commands)
     {
         for (PucmanCommand command : commands) {
