@@ -19,7 +19,7 @@
     </repositories>
 
     <properties>
-        <spigot.version>1.12.2-R0.1-SNAPSHOT</spigot.version>
+        <server.version>1.12.2-R0.1-SNAPSHOT</server.version>
         <minecraft.version>1.12.2-SNAPSHOT</minecraft.version>
         <nms.version>v1_12_R1</nms.version>
     </properties>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>${spigot.version}</version>
+            <version>${server.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -76,6 +76,12 @@
             <artifactId>minecraft-server</artifactId>
             <version>${minecraft.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>${server.version}</version>
         </dependency>
 
         <dependency>

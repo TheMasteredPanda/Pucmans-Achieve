@@ -26,7 +26,7 @@ public final class ReflectUtil
      */
     private static final LoadingCache<String, Object> REFLECT_CACHE = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(5, TimeUnit.MINUTES).build(new ReflectCacheLoader());
 
-    private ReflectUtil()
+    public ReflectUtil()
     {
         throw new UtilException();
     }
