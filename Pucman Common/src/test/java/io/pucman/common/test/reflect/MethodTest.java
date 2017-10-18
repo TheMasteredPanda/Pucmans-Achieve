@@ -1,8 +1,9 @@
 package io.pucman.common.test.reflect;
 
 import io.pucman.common.exception.TryUtil;
-import io.pucman.common.test.reflect.accessors.ConstructorAccessor;
-import io.pucman.common.test.reflect.accessors.MethodAccessor;
+import io.pucman.common.reflect.ReflectUtil;
+import io.pucman.common.reflect.accessors.ConstructorAccessor;
+import io.pucman.common.reflect.accessors.MethodAccessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

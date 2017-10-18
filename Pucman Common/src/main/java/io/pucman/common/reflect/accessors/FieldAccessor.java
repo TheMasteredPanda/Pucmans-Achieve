@@ -1,7 +1,7 @@
-package io.pucman.common.test.reflect.accessors;
+package io.pucman.common.reflect.accessors;
 
 import io.pucman.common.generic.GenericUtil;
-import io.pucman.common.test.reflect.ReflectUtil;
+import io.pucman.common.reflect.ReflectUtil;
 import lombok.SneakyThrows;
 
 import java.lang.annotation.Annotation;

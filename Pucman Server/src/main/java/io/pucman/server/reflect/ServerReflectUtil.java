@@ -1,11 +1,11 @@
 package io.pucman.server.reflect;
 
-import io.pucman.common.test.reflect.ReflectUtil;
+import io.pucman.common.reflect.ReflectUtil;
 
 /**
  * Consider this an extention of ReflectUtil, but for servers specifically.
  *
- * @see io.pucman.common.test.reflect.ReflectUtil
+ * @see ReflectUtil
  */
 public class ServerReflectUtil
 {

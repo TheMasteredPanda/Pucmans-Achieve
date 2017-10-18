@@ -2,9 +2,9 @@ package io.pucman.server.file.config;
 
 import com.google.gson.Gson;
 import io.pucman.common.exception.TryUtil;
-import io.pucman.common.test.reflect.ReflectUtil;
-import io.pucman.common.test.reflect.accessors.ConstructorAccessor;
-import io.pucman.common.test.reflect.accessors.FieldAccessor;
+import io.pucman.common.reflect.ReflectUtil;
+import io.pucman.common.reflect.accessors.ConstructorAccessor;
+import io.pucman.common.reflect.accessors.FieldAccessor;
 
 import java.io.*;
 import java.util.Map;

@@ -1,5 +1,6 @@
 package io.pucman.common.test.math;
 
+import io.pucman.common.math.NumberUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

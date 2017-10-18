@@ -1,11 +1,11 @@
-package io.pucman.common.test.reflect;
+package io.pucman.common.reflect;
 
 import com.google.common.cache.CacheLoader;
 import com.google.common.collect.Lists;
 import io.pucman.common.exception.DeveloperException;
-import io.pucman.common.test.reflect.accessors.ConstructorAccessor;
-import io.pucman.common.test.reflect.accessors.FieldAccessor;
-import io.pucman.common.test.reflect.accessors.MethodAccessor;
+import io.pucman.common.reflect.accessors.FieldAccessor;
+import io.pucman.common.reflect.accessors.ConstructorAccessor;
+import io.pucman.common.reflect.accessors.MethodAccessor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
