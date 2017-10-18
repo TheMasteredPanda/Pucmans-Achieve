@@ -1,4 +1,4 @@
-package io.pucman.common.reflect;
+package io.pucman.common.test.reflect;
 
 import lombok.Getter;
 

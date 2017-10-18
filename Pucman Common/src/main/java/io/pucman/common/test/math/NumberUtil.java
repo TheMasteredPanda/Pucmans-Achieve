@@ -1,4 +1,4 @@
-package io.pucman.common.math;
+package io.pucman.common.test.math;
 
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.exception.UtilException;

@@ -2,8 +2,8 @@ package io.pucman.server.command;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import io.pucman.common.reflect.ReflectUtil;
-import io.pucman.common.reflect.accessors.FieldAccessor;
+import io.pucman.common.test.reflect.ReflectUtil;
+import io.pucman.common.test.reflect.accessors.FieldAccessor;
 import io.pucman.server.manager.Manager;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.SimplePluginManager;

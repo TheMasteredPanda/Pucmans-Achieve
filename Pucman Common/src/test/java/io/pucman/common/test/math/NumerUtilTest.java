@@ -1,4 +1,4 @@
-package io.pucman.common.math;
+package io.pucman.common.test.math;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

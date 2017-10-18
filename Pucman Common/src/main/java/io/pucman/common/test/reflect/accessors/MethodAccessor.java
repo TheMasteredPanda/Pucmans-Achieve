@@ -1,7 +1,7 @@
-package io.pucman.common.reflect.accessors;
+package io.pucman.common.test.reflect.accessors;
 
 import io.pucman.common.generic.GenericUtil;
-import io.pucman.common.reflect.ReflectUtil;
+import io.pucman.common.test.reflect.ReflectUtil;
 import lombok.SneakyThrows;
 
 import java.lang.annotation.Annotation;
@@ -10,7 +10,7 @@ import java.lang.reflect.Parameter;
 
 /**
  * Wrapper for handling reflected methods.
- * @see io.pucman.common.reflect.ReflectUtil#get(Class, String, ReflectUtil.Type, Class[]) .
+ * @see io.pucman.common.test.reflect.ReflectUtil#get(Class, String, ReflectUtil.Type, Class[]) .
  * @param <T> - return type of the method.
  */
 public class MethodAccessor<T>

@@ -10,7 +10,7 @@ import io.pucman.bungee.locale.Locale;
 import io.pucman.bungee.sender.Sender;
 import io.pucman.common.exception.TrySupplier;
 import io.pucman.common.exception.TryUtil;
-import io.pucman.common.math.NumberUtil;
+import io.pucman.common.test.math.NumberUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import net.md_5.bungee.api.CommandSender;
