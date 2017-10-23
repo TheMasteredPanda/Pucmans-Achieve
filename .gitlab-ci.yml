@@ -1,7 +1,7 @@
 image: maven:latest
 
 build:
-  script: "mvn clean package -pl 'Pucman Common' -am"
+  script: "mvn clean package -pl 'Pucman Common':'Pucman Bungee' -am"
   artifacts:
      paths:
        - "Pucman Server/target/*.jar"
