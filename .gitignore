@@ -1,9 +1,8 @@
-Pucman Archive.iml
-Pucman Bungee/Pucman Bungee.iml
+pucman-parent.iml
+Pucman Bungee/pucman-bungee.iml
 Pucman Bungee/target
-Pucman Common/Pucman Common.iml
+Pucman Common/pucman-common.iml
 Pucman Common/target
-Pucman Server/Pucman Server.iml
+Pucman Server/pucman-server.iml
 Pucman Server/target
 .idea
-target
