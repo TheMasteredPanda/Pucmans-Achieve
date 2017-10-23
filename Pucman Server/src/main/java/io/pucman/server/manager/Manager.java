@@ -5,16 +5,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Used for classes of with will be the manager of a
+ * library section.
+ * @param <P>
+ */
 public class Manager<P extends JavaPlugin>
 {
-    @Getter
-    private P instance;
-
+    protected P instance;
+    private AtomicBoolean enable = new AtomicBoolean(false);
     @Getter
     private Priority priority;
-
-    @Getter
-    private AtomicBoolean enabled = new AtomicBoolean(false);
 
     public Manager(P instance, Priority priority)
     {
@@ -22,25 +23,31 @@ public class Manager<P extends JavaPlugin>
         this.priority = priority;
     }
 
-    public enum Priority
+    /**
+     * Invoked when all managers are being enabled.
+     */
+    protected void init()
     {
-        HIGH, NORMAL
-    }
-
-    public void init()
-    {
-        if (!this.enabled.get()) {
+        if (!this.enable.get()) {
             this.onEnable();
-            this.enabled.set(true);
+            this.enable.set(true);
         }
     }
 
+    /**
+     * Invoked when all managers are being disabled.
+     */
     public void shutdown()
     {
-        if (this.enabled.get()) {
+        if (this.enable.get()) {
             this.onDisable();
-            this.enabled.set(false);
+            this.enable.set(false);
         }
+    }
+
+    public boolean isEnabled()
+    {
+        return this.enable.get();
     }
 
     public void onEnable()
@@ -49,5 +56,15 @@ public class Manager<P extends JavaPlugin>
 
     public void onDisable()
     {
+    }
+
+    /**
+     * HIGH - first managers to be enabled.
+     * NORMAL - last managers to be enabled.
+     * This applies to the disabling of managers as well.
+     */
+    public enum Priority
+    {
+        NORMAL, HIGH
     }
 }

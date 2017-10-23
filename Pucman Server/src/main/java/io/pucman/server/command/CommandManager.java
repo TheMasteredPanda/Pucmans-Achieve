@@ -9,11 +9,23 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 
+/**
+ * Manager for PumanCommands.
+ * @param <P>
+ */
 public class CommandManager<P extends JavaPlugin> extends Manager<P>
 {
+    /**
+     * Executor service used for execution various bodies of the PucmanCommand wrapper.
+     */
     protected ListeningExecutorService service;
+
+    /**
+     * Command map used to register all commands.
+     */
     private SimpleCommandMap commandMap;
 
     public CommandManager(P instance)
@@ -22,10 +34,19 @@ public class CommandManager<P extends JavaPlugin> extends Manager<P>
         this.service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
         if (this.commandMap == null) {
-            SimplePluginManager simplePluginManager = (SimplePluginManager) this.getInstance().getServer().getPluginManager();
+            SimplePluginManager simplePluginManager = (SimplePluginManager) this.instance.getServer().getPluginManager();
             FieldAccessor<SimpleCommandMap> accessor = ReflectUtil.get(simplePluginManager.getClass(), "commandMap", ReflectUtil.Type.DECLARED);
             accessor.get().setAccessible(true);
             this.commandMap = accessor.get(simplePluginManager);
         }
+    }
+
+    /**
+     * Registers an array of commands.
+     * @param commands - the PucmanCommands.
+     */
+    public void register(PucmanCommand... commands)
+    {
+        Arrays.stream(commands).forEachOrdered(cmd -> this.commandMap.register(instance.getName(), cmd.command));
     }
 }

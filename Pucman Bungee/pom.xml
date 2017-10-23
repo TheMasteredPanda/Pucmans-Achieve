@@ -13,8 +13,8 @@
 
     <repositories>
         <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+            <id>bungeecord-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
 
@@ -41,6 +41,8 @@
             <version>1.12-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+
 
         <dependency>
             <groupId>net.legendaryhosts.pucman</groupId>

@@ -1,5 +1,6 @@
 package io.pucman.server;
 
+import io.pucman.server.command.CommandManager;
 import io.pucman.server.manager.ManagingPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -13,6 +14,7 @@ public class PLibrary extends ManagingPlugin
     public void onLoad()
     {
         instance = this;
+        this.load(new CommandManager<>(this));
     }
 
     @Override

@@ -16,6 +16,7 @@ import lombok.NonNull;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
+import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -31,16 +32,15 @@ import java.util.stream.Collectors;
  * Asynchronous states indicate what level of asynchronous execution the command body
  * will undergo. The following the states are explained as follows:
  *
- * FULL - All three methods (this#execute, this#onFailure, and this#onSuccess) are executed
+ * 2 - All three methods (this#execute, this#onFailure, and this#onSuccess) are executed
  * asynchronously on the same thread.
  *
- * SEMI - The method body, which would reside in this#execute, would be executed asynchronously,
+ * 1 - The method body, which would reside in this#execute, would be executed asynchronously,
  * but either methods this#onFailure or this#onSuccess, depending on the response give inside the
  * body of the command, will not be executed asynchronously.
  *
- * NONE - All three methods will not be executed asynchronously in any capacity.
+ * 0 - All three methods will not be executed asynchronously in any capacity.
  *
- * @see AsynchronousState
  * @see this#execute(CommandSender, LinkedList)
  * @see this#onSuccess(CommandSender, Map, LinkedList)
  * @see this#onFailure(CommandSender, Map, LinkedList)
@@ -50,8 +50,13 @@ import java.util.stream.Collectors;
  * as required argument fields, fields that are required in order for the command to run.
  *
  */
-public abstract class PucmanCommand extends Command
+public abstract class PucmanCommand<P extends Plugin> extends Command
 {
+    /**
+     * Instance of the plugin passed in the constructors.
+     */
+    protected P instance;
+
     /**
      * Parent commands essentially does what it says on the tin. These are commands that consider
      * this command to be a child command, and vise versa. A parent command cannot also be a child
@@ -95,7 +100,7 @@ public abstract class PucmanCommand extends Command
      * Asynchronous state, cannot be null.
      */
     @Getter
-    private AsynchronousState state;
+    private int state;
 
     /**
      * The following fields are primarily locale.
@@ -131,6 +136,7 @@ public abstract class PucmanCommand extends Command
 
     /**
      * Main constructor to this wrapper, contains all the necessary information.
+     * @param instance - instance of the plugin the command belongs to.
      * @param name - the 'main alias' of this command.
      * @param permission - the permission node of this command, if this is set to null the wrapper will consider this
      *                   command to not have a permission.
@@ -139,7 +145,7 @@ public abstract class PucmanCommand extends Command
      * @param asynchronousState - the asynchronous state of this command, described above.
      * @param aliases - the aliases of this command.
      */
-    public PucmanCommand(@NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, @NonNull AsynchronousState asynchronousState, String... aliases)
+    public PucmanCommand(@NonNull P instance, @NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, @NonNull int asynchronousState, String... aliases)
     {
         super(name, permission, aliases);
         locale.populate(this.getClass());
@@ -152,14 +158,14 @@ public abstract class PucmanCommand extends Command
         this.state = asynchronousState;
     }
 
-    public PucmanCommand(Locale locale, String name, String description, boolean playerOnlyCommand, AsynchronousState state)
+    public PucmanCommand(P instance, Locale locale, String name, String description, boolean playerOnlyCommand, int state)
     {
-        this(locale, name, null, description, playerOnlyCommand, state);
+        this(instance, locale, name, null, description, playerOnlyCommand, state);
     }
 
-    public PucmanCommand(Locale locale, String name, String description, AsynchronousState state)
+    public PucmanCommand(P instance, Locale locale, String name, String description, int state)
     {
-        this(locale, name, null, description, false, state);
+        this(instance, locale, name, null, description, false, state);
     }
 
     /**
@@ -360,7 +366,7 @@ public abstract class PucmanCommand extends Command
             newArgs.remove(args[0]);
 
             switch (this.state) {
-                case FULL: {
+                case 2: {
                     ListenableFuture<CommandResponse> fullFuture = this.manager.service.submit(() -> this.execute(sender, newArgs));
                     CommandResponse fullResponse = TryUtil.sneaky((TrySupplier<CommandResponse>) fullFuture::get);
                     fullFuture.addListener(() -> {
@@ -372,7 +378,7 @@ public abstract class PucmanCommand extends Command
                     }, this.manager.service);
                     return;
                 }
-                case SEMI: {
+                case 1: {
                     ListenableFuture<CommandResponse> semiFuture = this.manager.service.submit(() -> this.execute(sender, newArgs));
                     CommandResponse semiResponse = TryUtil.sneaky((TrySupplier<CommandResponse>) semiFuture::get);
                     if (semiResponse.getType() == CommandResponse.Type.SUCCESS) {
@@ -382,7 +388,7 @@ public abstract class PucmanCommand extends Command
                     }
                     return;
                 }
-                case NONE: {
+                case 0: {
                     CommandResponse noneResponse = this.execute(sender, newArgs);
 
                     if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
@@ -408,7 +414,8 @@ public abstract class PucmanCommand extends Command
      * @param sender - the seconder of the command
      * @param parameters - the parameters.
      */
-    public abstract void onFailure(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters);
+    public void onFailure(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters) {
+    }
 
     /**
      * If the commands body returns a successful command response, this part of the command
@@ -416,5 +423,6 @@ public abstract class PucmanCommand extends Command
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public abstract void onSuccess(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters);
+    public void onSuccess(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters) {
+    }
 }
