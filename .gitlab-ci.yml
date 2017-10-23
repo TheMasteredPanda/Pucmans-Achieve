@@ -4,4 +4,6 @@ build:
   script: "mvn clean package -pl 'Pucman Common' -am"
   artifacts:
      paths:
-       - "target/*.jar"
+       - "Pucman Server/target/*.jar"
+       - "Pucman Common/target/*.jar"
+       - "Pucman Bungee/target/*.jar"
