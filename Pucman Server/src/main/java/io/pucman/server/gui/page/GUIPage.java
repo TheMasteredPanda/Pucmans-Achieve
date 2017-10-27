@@ -4,6 +4,10 @@ import io.pucman.server.gui.GUIPlayer;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * GUIPage, regular gui page.
+ * @param <P>
+ */
 public abstract class GUIPage<P extends JavaPlugin>
 {
     protected final P plugin;

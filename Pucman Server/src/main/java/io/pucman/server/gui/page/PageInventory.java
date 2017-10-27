@@ -1,6 +1,7 @@
 package io.pucman.server.gui.page;
 
 import com.google.common.collect.Lists;
+import io.pucman.common.exception.DeveloperException;
 import io.pucman.server.gui.GUIPlayer;
 import io.pucman.server.locale.Format;
 import org.bukkit.Bukkit;
@@ -14,6 +15,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * GUI inventory for a 'book' like functionality.
+ */
 public class PageInventory implements GUIInventory
 {
     private static final ItemStack BACK_BUTTON;
@@ -32,39 +36,84 @@ public class PageInventory implements GUIInventory
         FORWARD_BUTTON.setItemMeta(meta);
     }
 
+    /**
+     * GUIPlayer that is viewing this gui.
+     */
     private final GUIPlayer player;
 
+    /**
+     * Contents of the gui.
+     */
     private final List<ItemStack> contents = Lists.newArrayList();
+
+    /**
+     * Title of each gui page.
+     */
     private final String title;
 
+    /**
+     * Current page number.
+     */
     private int page = 1;
+
+    /**
+     * Total amount of pages that can be viewed.
+     */
     private int totalPages = 1;
 
-    public PageInventory(GUIPlayer player, String title) {
+    public PageInventory(GUIPlayer player, String title)
+    {
         this.player = player;
         this.title = title;
     }
 
-    public PageInventory addItem(ItemStack item) {
+    /**
+     * Add an item to the content of this gui.
+     * @param item - item.
+     * @return this.
+     */
+    public PageInventory addItem(ItemStack item)
+    {
         this.contents.add(item);
         this.recalculate();
         return this;
     }
 
-    public PageInventory withItems(Collection<ItemStack> items) {
+    /**
+     * Add a collection of items to this content of this gui.
+     * @param items - collection of items.
+     * @return this.
+     */
+    public PageInventory withItems(Collection<ItemStack> items)
+    {
         this.contents.addAll(items);
         this.recalculate();
         return this;
     }
 
-    public PageInventory withItems(ItemStack... items) {
+    /**
+     * Add an array of items to this gui.
+     * @param items - the array of items.
+     * @return this.
+     */
+    public PageInventory withItems(ItemStack... items)
+    {
         this.contents.addAll(Arrays.asList(items));
         this.recalculate();
         return this;
     }
 
+    /**
+     * To open up an inventory instance. The way this gui works is as follows: the
+     * list of content is parsed to fit the size of the inventory while leaving
+     * out space for the index, which is at the bottom of the inventory. When you
+     * change the page, be either clicking the forward or back buttons in the index,
+     * it will parse the next set of items in the content list to go on that page or
+     * the last set of items to go on that pages.
+     */
     @Override
-    public void open() {
+    public void open()
+    {
         if (totalPages == 1) {
             Inventory inventory = Bukkit.createInventory(null, calcSize(contents.size()), title);
             int slot = 0;
@@ -109,27 +158,44 @@ public class PageInventory implements GUIInventory
         player.stopInternalIgnore(InternalType.PAGES);
     }
 
+    /**
+     * Changes the page number and opens the last page.
+     */
     private void backPage()
     {
         page--;
         open();
     }
 
+    /**
+     * Changes the page number and opens the next page.
+     */
     private void forwardPage()
     {
         page++;
         open();
     }
 
-    private void recalculate() {
+    /**
+     * Calculates the amount of pages possible to be generated with the amount of content that has been added.
+     */
+    private void recalculate()
+    {
         this.totalPages = this.contents.size() > 54 ? this.contents.size() / 45 : 1;
     }
 
-    private int calcSize(int size) {
+    /**
+     * Calculates the size of the page.
+     * @param size - the amount of content that will be on the page..
+     * @return the total size of the page.
+     */
+    private int calcSize(int size)
+    {
         return (((size - 1) / 9) + 1) * 9;
     }
 
-    private int getPages(int size) {
+    private int getPages(int size)
+    {
         if (size % 45 == 0) {
             return size / 45;
         }
@@ -137,13 +203,25 @@ public class PageInventory implements GUIInventory
         return (int) Math.ceil(d);
     }
 
+    /**
+     * Checks if the item in the slot has an immutable action attached to it.
+     * @param slot - slot.
+     * @return true if it does, else false.
+     */
     @Override
-    public boolean hasAction(int slot) {
+    public boolean hasAction(int slot)
+    {
         return totalPages > 1 && ((slot == 45) || (slot == 53));
     }
 
+    /**
+     * Executes the action corresponding to that slot.
+     * @param slot - the slot.
+     * @param event - the event.
+     */
     @Override
-    public void executeAction(int slot, InventoryClickEvent event) {
+    public void executeAction(int slot, InventoryClickEvent event)
+    {
         if (slot == 45 && page > 1) {
             backPage();
         }
@@ -153,17 +231,19 @@ public class PageInventory implements GUIInventory
     }
 
     @Override
-    public void setItem(int slot, ItemStack item) {
-        throw new RuntimeException("Setting items not supported in PageInventory");
+    public void setItem(int slot, ItemStack item)
+    {
+        throw new DeveloperException("Setting items not supported in PageInventory");
+    }
+    @Override
+    public void setItem(int slot, ItemStack item, Action action)
+    {
+        throw new DeveloperException("Setting items not supported in PageInventory");
     }
 
     @Override
-    public void setItem(int slot, ItemStack item, Action action) {
-        throw new RuntimeException("Setting items not supported in PageInventory");
-    }
-
-    @Override
-    public Inventory getHeldInventory() {
-        return null;
+    public Inventory getHeldInventory()
+    {
+        throw new DeveloperException("Getting the instance of the current inventory is not supported.");
     }
 }

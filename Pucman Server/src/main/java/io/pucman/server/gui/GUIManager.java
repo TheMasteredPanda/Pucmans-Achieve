@@ -36,7 +36,7 @@ public class GUIManager extends Manager<PLibrary>
 
     /**
      * Register a player.
-     * @param player
+     * @param player - player instance.
      */
     public void register(Player player)
     {
@@ -45,7 +45,7 @@ public class GUIManager extends Manager<PLibrary>
 
     /**
      * Unregister a player.
-     * @param player
+     * @param player - player instance.
      */
     public void unregister(Player player)
     {
@@ -54,8 +54,8 @@ public class GUIManager extends Manager<PLibrary>
 
     /**
      * Get a wrapped player instance.
-     * @param player
-     * @return
+     * @param player - player instance.
+     * @return Corresponding GUIPlayer instance.
      */
     public GUIPlayer getPlayer(Player player)
     {
@@ -68,7 +68,7 @@ public class GUIManager extends Manager<PLibrary>
     }
 
     /**
-     * GUI Listeners, invoked when
+     * GUI Listeners.
      */
     public class GUIListeners implements Listener
     {
