@@ -45,7 +45,7 @@ public class BaseFile
      */
     public synchronized void load()
     {
-        if (instance.getResourceAsStream(name) != null) {
+        if (this.instance.getResourceAsStream(name) != null) {
             TryUtil.sneaky(() -> Files.copy(instance.getResourceAsStream(name), file.toPath(), StandardCopyOption.ATOMIC_MOVE));
         }
 

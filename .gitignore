@@ -5,4 +5,5 @@ Pucman Common/pucman-common.iml
 Pucman Common/target
 Pucman Server/pucman-server.iml
 Pucman Server/target
+Pucman Server/src/main/java/io/pucman/server/gui
 .idea

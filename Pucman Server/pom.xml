@@ -72,6 +72,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>${server.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>minecraft-server</artifactId>
             <version>${minecraft.version}</version>
@@ -85,7 +91,7 @@
         </dependency>
 
         <dependency>
-            <groupId>net.legendaryhosts.pucman</groupId>
+            <groupId>io.pucman</groupId>
             <artifactId>pucman-common</artifactId>
             <version>1.0</version>
         </dependency>

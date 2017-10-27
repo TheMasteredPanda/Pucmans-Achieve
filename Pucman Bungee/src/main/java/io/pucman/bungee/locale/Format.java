@@ -5,6 +5,7 @@ import io.pucman.common.exception.UtilException;
 import io.pucman.common.generic.GenericUtil;
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,6 +26,20 @@ public final class Format
     public static String color(String message)
     {
         return ChatColor.translateAlternateColorCodes('&', message);
+    }
+
+    /**
+     * For replacing a string's placeholders {i} to objects.
+     * @param message - string.
+     * @param objects - objects.
+     * @return formatted message.
+     */
+    public static String format(String message, Object... objects) {
+        for (int i = 0; i < objects.length; i++) {
+            message = message.replace("{" + String.valueOf(i) + "]", objects[i].toString());
+        }
+
+        return message;
     }
 
     /**
