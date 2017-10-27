@@ -8,10 +8,14 @@ import io.pucman.server.file.BaseFile;
 import io.pucman.server.file.ConfigPopulate;
 import io.pucman.server.file.config.ConfigurationProvider;
 import io.pucman.server.file.config.YamlProvider;
+import lombok.SneakyThrows;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -59,11 +63,22 @@ public class Locale<P extends JavaPlugin> extends BaseFile
         super(instance, name, parent, YamlProvider.class);
     }
 
-    @Override
+    @Override @SneakyThrows
     public synchronized void load()
     {
-        if (this.getInstance().getResource(this.getName()) != null) {
-            TryUtil.sneaky(() -> Files.copy(this.getInstance().getResource(this.getName()), this.getFile().toPath(), StandardCopyOption.ATOMIC_MOVE));
+        if (this.getInstance().getResource(this.getName()) != null && !this.getFile().exists()) {
+            InputStream is = this.getInstance().getResource(this.getName());
+            OutputStream os = new FileOutputStream(this.getFile());
+
+            byte[] buffer = new byte[1024];
+            int bytesRead = 0;
+
+            while ((bytesRead = is.read()) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+
+            is.close();
+            os.close();
         }
 
         if (this.getConfiguration() == null) {

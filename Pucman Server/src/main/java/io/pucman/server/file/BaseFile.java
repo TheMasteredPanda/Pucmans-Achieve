@@ -9,10 +9,14 @@ import io.pucman.server.locale.Format;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -43,10 +47,22 @@ public class BaseFile
      * Loads the file, if the file is not present in the parent directory but has
      * been compiled with the plugin, it will copy it over.
      */
+    @SneakyThrows
     public synchronized void load()
     {
-        if (instance.getResource(name) != null) {
-            TryUtil.sneaky(() -> Files.copy(instance.getResource(name), file.toPath(), StandardCopyOption.ATOMIC_MOVE));
+        if (this.instance.getResource(this.getName()) != null && !this.file.exists()) {
+            InputStream is = this.instance.getResource(this.getName());
+            OutputStream os = new FileOutputStream(this.getFile());
+
+            byte[] buffer = new byte[1024];
+            int bytesRead = 0;
+
+            while ((bytesRead = is.read()) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+
+            is.close();
+            os.close();
         }
 
         if (this.configuration == null) {
