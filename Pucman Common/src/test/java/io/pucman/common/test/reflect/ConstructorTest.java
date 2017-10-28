@@ -11,7 +11,7 @@ public class ConstructorTest
     @Test
     public void getConstructor()
     {
-        ConstructorAccessor<ReflectClass> clazz = TryUtil.sneaky(() -> ReflectUtil.wrap(ReflectClass.class.getConstructor(String.class)));
+        ConstructorAccessor<ReflectClass> clazz = TryUtil.sneaky(() -> ReflectUtil.wrap(ReflectClass.class.getConstructor(String.class)), ConstructorAccessor.class);
         Assertions.assertEquals(clazz, ReflectUtil.get(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class));
         clazz = null;
     }

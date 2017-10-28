@@ -12,7 +12,7 @@ public class MethodTest
     @Test
     public void getMethod()
     {
-        MethodAccessor<String> accessor = TryUtil.sneaky(() -> ReflectUtil.wrap(ReflectClass.class.getMethod("getText")));
+        MethodAccessor<String> accessor = TryUtil.sneaky(() -> ReflectUtil.wrap(ReflectClass.class.getMethod("getText")), MethodAccessor.class);
         Assertions.assertEquals(accessor, ReflectUtil.get(ReflectClass.class, "getText", ReflectUtil.Type.DECLARED, new Class[0]));
         accessor = null;
     }

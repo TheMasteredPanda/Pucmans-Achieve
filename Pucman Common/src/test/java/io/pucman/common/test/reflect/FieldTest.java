@@ -12,7 +12,7 @@ public class FieldTest
     @Test
     public void getField()
     {
-        FieldAccessor<String> fieldAccessor = TryUtil.sneaky(() -> ReflectUtil.wrap(ReflectClass.class.getField("s")));
+        FieldAccessor<String> fieldAccessor = TryUtil.sneaky(() -> ReflectUtil.wrap(ReflectClass.class.getField("s")), FieldAccessor.class);
         Assertions.assertEquals(fieldAccessor, ReflectUtil.get(ReflectClass.class, "s", ReflectUtil.Type.DECLARED));
         fieldAccessor = null;
     }
