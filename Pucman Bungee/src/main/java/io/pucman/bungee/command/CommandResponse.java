@@ -3,7 +3,10 @@ package io.pucman.bungee.command;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.api.CommandSender;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,6 +18,8 @@ import java.util.Map;
 @Getter
 public class CommandResponse
 {
+    private final CommandSender sender;
+    private final LinkedList<String> arguments;
     private final Type type;
     private Map<String, Object> data = Maps.newLinkedHashMap();
 

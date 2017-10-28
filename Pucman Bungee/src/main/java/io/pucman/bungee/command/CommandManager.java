@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.manager.Manager;
+import lombok.AccessLevel;
+import lombok.Getter;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -22,7 +24,8 @@ public class CommandManager extends Manager<PLibrary>
      *
      * @see PucmanCommand
      */
-    protected ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    @Getter(value = AccessLevel.PROTECTED)
+    private ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
 
     public CommandManager(PLibrary instance)

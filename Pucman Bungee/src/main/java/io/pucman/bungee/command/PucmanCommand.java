@@ -2,6 +2,8 @@ package io.pucman.bungee.command;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.file.ConfigPopulate;
@@ -18,6 +20,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Map;
@@ -367,20 +370,32 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
 
             switch (this.state) {
                 case 2: {
-                    ListenableFuture<CommandResponse> fullFuture = this.manager.service.submit(() -> this.execute(sender, newArgs));
-                    CommandResponse fullResponse = TryUtil.sneaky((TrySupplier<CommandResponse>) fullFuture::get);
-                    fullFuture.addListener(() -> {
-                        if (fullResponse.getType() == CommandResponse.Type.SUCCESS) {
-                            this.onSuccess(sender, fullResponse.getData(), newArgs);
-                        } else {
-                            this.onFailure(sender, fullResponse.getData(), newArgs);
+                    ListenableFuture<CommandResponse> fullFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
+                    Futures.addCallback(fullFuture, new FutureCallback<CommandResponse>()
+                    {
+                        @Override
+                        public void onSuccess(@Nullable CommandResponse response)
+                        {
+                            if (response.getType() == CommandResponse.Type.SUCCESS) {
+                                PucmanCommand.this.onSuccess(response.getSender(), response.getData(), response.getArguments());
+                            } else {
+                                PucmanCommand.this.onFailure(response.getSender(), response.getData(), response.getArguments());
+                            }
                         }
-                    }, this.manager.service);
+
+                        @Override
+                        public void onFailure(Throwable throwable)
+                        {
+
+                        }
+                    });
                     return;
                 }
+
                 case 1: {
-                    ListenableFuture<CommandResponse> semiFuture = this.manager.service.submit(() -> this.execute(sender, newArgs));
-                    CommandResponse semiResponse = TryUtil.sneaky((TrySupplier<CommandResponse>) semiFuture::get);
+                    ListenableFuture<CommandResponse> semiFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
+                    CommandResponse semiResponse = TryUtil.sneaky(semiFuture::get, CommandResponse.class);
+
                     if (semiResponse.getType() == CommandResponse.Type.SUCCESS) {
                         this.onSuccess(sender, semiResponse.getData(), newArgs);
                     } else {
@@ -388,6 +403,7 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
                     }
                     return;
                 }
+
                 case 0: {
                     CommandResponse noneResponse = this.execute(sender, newArgs);
 
