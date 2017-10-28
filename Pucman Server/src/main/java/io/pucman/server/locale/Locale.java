@@ -6,6 +6,7 @@ import io.pucman.common.exception.TryUtil;
 import io.pucman.common.generic.GenericUtil;
 import io.pucman.server.file.BaseFile;
 import io.pucman.server.file.ConfigPopulate;
+import io.pucman.server.file.config.Configuration;
 import io.pucman.server.file.config.ConfigurationProvider;
 import io.pucman.server.file.config.YamlProvider;
 import lombok.SneakyThrows;
@@ -82,7 +83,7 @@ public class Locale<P extends JavaPlugin> extends BaseFile
         }
 
         if (this.getConfiguration() == null) {
-            this.setConfiguration(TryUtil.sneaky(() -> ConfigurationProvider.getProvider(this.getProvider()).load(this.getFile())));
+            this.setConfiguration(TryUtil.sneaky(() -> ConfigurationProvider.getProvider(this.getProvider()).load(this.getFile()), Configuration.class));
         }
 
         this.PLUGIN_PREFIX = this.getMessage("Prefix");

@@ -50,7 +50,7 @@ public class BaseFile
         }
 
         if (this.configuration == null) {
-            this.configuration = TryUtil.sneaky(() -> ConfigurationProvider.getProvider(provider).load(this.file));
+            this.configuration = TryUtil.sneaky(() -> ConfigurationProvider.getProvider(provider).load(this.file), Configuration.class);
         }
     }
 

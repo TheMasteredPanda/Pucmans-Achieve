@@ -7,6 +7,7 @@ import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.exception.TryUtil;
 import io.pucman.common.generic.GenericUtil;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
@@ -67,7 +68,7 @@ public class Locale<P extends Plugin> extends BaseFile
         }
 
         if (this.getConfiguration() == null) {
-            this.setConfiguration(TryUtil.sneaky(() -> ConfigurationProvider.getProvider(this.getProvider()).load(this.getFile())));
+            this.setConfiguration(TryUtil.sneaky(() -> ConfigurationProvider.getProvider(this.getProvider()).load(this.getFile()), Configuration.class));
         }
 
         this.PLUGIN_PREFIX = this.getMessage("Prefix");
