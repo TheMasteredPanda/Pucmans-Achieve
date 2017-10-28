@@ -13,9 +13,10 @@ import java.util.Arrays;
 import java.util.concurrent.Executors;
 
 /**
- * Manager for PumanCommands.
+ * Manager for PucmanCommands.
  * @param <P>
  */
+//TODO REDO
 public class CommandManager<P extends JavaPlugin> extends Manager<P>
 {
     /**
