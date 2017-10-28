@@ -57,11 +57,6 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
     protected P instance;
 
     /**
-     * The command this wrapper is wrapping.
-     */
-    protected Command command;
-
-    /**
      * Parent commands essentially does what it says on the tin. These are commands that consider
      * this command to be a child command, and vise versa. A parent command cannot also be a child
      * command of the same instance, and a child command cannot also be a parent command of the instance.
@@ -170,107 +165,6 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
         this.state = state;
         this.aliases.add(name);
         this.aliases.addAll(Arrays.asList(aliases));
-
-        /**
-         * Command boxy.
-         */
-        this.command = new Command(name, description, this.getCommandPath(), Arrays.asList(aliases))
-        {
-            @Override
-            public boolean execute(CommandSender sender, String s, String[] args)
-            {
-
-                if (isPlayerOnlyCommand() && !(sender instanceof Player)) {
-                    Sender.send(sender, PLAYER_ONLY_COMMAND);
-                    return false;
-                }
-
-                if (!this.testPermission(sender)) {
-                    Sender.send(sender, NO_PERMISSION);
-                    return false;
-                }
-
-                if (args.length > 1) {
-                    if (args[0].equalsIgnoreCase("help")) {
-                        LinkedList<String> content = Lists.newLinkedList();
-                        content.add(PARENT_COMMAND_HEADER.replace("{commandusage}", getCommandUsage()).replace("{commanddescrption}", this.getDescription()));
-
-                        if (childCommands.size() > 0) {
-                            content.add(CHILD_COMMAND_HEADER);
-
-                            for (PucmanCommand child : childCommands) {
-                                content.add(COMMAND_ENTRY.replace("{commandusage}", child.getCommandPath()).replace("{commanddescription}", child.getDescription()));
-                            }
-                        }
-
-                        LinkedListMultimap<Integer, String> pages = Format.paginate(String.class, content, null, null, 5);
-
-                        if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
-                            Sender.send(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
-                        } else {
-                            Sender.send(sender, pages.get(1));
-                        }
-
-                        return true;
-                    }
-
-                    for (PucmanCommand child : parentCommands) {
-                        if (!child.isAlias(args[0])) {
-                            continue;
-                        }
-
-                        LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
-                        newArgs.remove(args[0]);
-                        child.execute(sender, newArgs);
-                        return true;
-                    }
-
-                    if (args.length - 1 < getRequiredArgumentFields().size()) {
-                        Sender.send(sender, NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", getCommandUsage()));
-                        return false;
-                    }
-
-                    LinkedList<String> newArgs = Lists.newLinkedList();
-                    newArgs.remove(args[0]);
-
-                    switch (state) {
-                        case 2: {
-                            ListenableFuture<CommandResponse> fullFuture = manager.service.submit(() -> PucmanCommand.this.execute(sender, newArgs));
-                            CommandResponse fullResponse = TryUtil.sneaky((TrySupplier<CommandResponse>) fullFuture::get);
-                            fullFuture.addListener(() -> {
-                                if (fullResponse.getType() == CommandResponse.Type.SUCCESS) {
-                                    onSuccess(sender, fullResponse.getData(), newArgs);
-                                } else {
-                                    onFailure(sender, fullResponse.getData(), newArgs);
-                                }
-                            }, manager.service);
-                            return true;
-                        }
-                        case 1: {
-                            ListenableFuture<CommandResponse> semiFuture = manager.service.submit(() -> PucmanCommand.this.execute(sender, newArgs));
-                            CommandResponse semiResponse = TryUtil.sneaky((TrySupplier<CommandResponse>) semiFuture::get);
-                            if (semiResponse.getType() == CommandResponse.Type.SUCCESS) {
-                                onSuccess(sender, semiResponse.getData(), newArgs);
-                            } else {
-                                onFailure(sender, semiResponse.getData(), newArgs);
-                            }
-                            return true;
-                        }
-                        case 0: {
-                            CommandResponse noneResponse = PucmanCommand.this.execute(sender, newArgs);
-
-                            if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
-                                onSuccess(sender, noneResponse.getData(), newArgs);
-                            } else {
-                                onFailure(sender, noneResponse.getData(), newArgs);
-                            }
-                        }
-                    }
-                }
-
-                return true;
-            }
-        };
     }
 
     public PucmanCommand(P instance, Locale locale, String name, String description, boolean playerOnlyCommand, int state, String... aliases)
