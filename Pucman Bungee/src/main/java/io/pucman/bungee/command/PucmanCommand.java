@@ -151,6 +151,7 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
     public PucmanCommand(@NonNull P instance, @NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, @NonNull int asynchronousState, String... aliases)
     {
         super(name, permission, aliases);
+        this.instance = instance;
         locale.populate(this.getClass());
 
         if (description != null) {

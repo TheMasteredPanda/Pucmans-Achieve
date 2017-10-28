@@ -14,6 +14,8 @@
 ##TODOs
 - Pucman Bukkit Library
   * NMS Library - net.minecraft.server library.
-  * Conversation Library - a better conversation API than is currently available in the Spigot API.
+  * [DOING] Conversation Library - a better conversation API than is currently available in the Spigot API.
   * Player Lookup Library Section - to get and cache players properties from the mojang servers.
-  
+  * [NEXT] Custom Plugin Manager - A custom plugin manager that uses the functionality of WatchServer to reload specific plugins, unload plugins that are no longer in the plugins folder and load plugins that have been added on the fly.
+- Pucmans Bungee Library
+  * Custom Plugin Manager - A custom plugin manager that uses the functionality of WatchServer to reload specific plugins, unload plugins that are no longer in the plugins folder and load plugins that have been added on the fly.
