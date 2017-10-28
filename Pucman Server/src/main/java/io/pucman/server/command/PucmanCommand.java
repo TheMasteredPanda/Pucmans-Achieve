@@ -13,6 +13,7 @@ import io.pucman.server.locale.Locale;
 import io.pucman.server.sender.Sender;
 import lombok.Getter;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -48,7 +49,7 @@ import java.util.Map;
  * as required argument fields, fields that are required in order for the command to run.
  *
  */
-public abstract class PucmanCommand<P extends JavaPlugin>
+public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExecutor
 {
     /**
      * Instance of the plugin this command belongs to.
@@ -358,6 +359,12 @@ public abstract class PucmanCommand<P extends JavaPlugin>
         }
     }
 
+    public boolean hasPermission(CommandSender sender)
+    {
+        return this.permission == null || sender.hasPermission(this.permission);
+    }
+
+
     /**
      * To check if a field is required.
      * @param field - field to check.
@@ -410,6 +417,72 @@ public abstract class PucmanCommand<P extends JavaPlugin>
         sb.append(" ").append(this.getDescription());
 
         return sb.toString();
+    }
+
+
+    @Override
+    public final boolean onCommand(CommandSender sender, Command command, String s, String[] args)
+    {
+        if (!this.isAlias(args[0])) {
+            return false;
+        }
+
+        if (this.isPlayerOnlyCommand() && !(sender instanceof Player)) {
+            Sender.send(sender, this.PLAYER_ONLY_COMMAND);
+            return false;
+        }
+
+        if (!this.hasPermission(sender)) {
+            Sender.send(sender, this.NO_PERMISSION);
+            return false;
+        }
+
+        if (args.length > 1) {
+            if (args[0].equalsIgnoreCase("help")) {
+                LinkedList<String> content = Lists.newLinkedList();
+                content.add(this.PARENT_COMMAND_HEADER.replace("{commandusage}", this.getCommandUsage()).replace("{commanddescrption}", this.getDescription()));
+
+                if (this.childCommands.size() > 0) {
+                    content.add(this.CHILD_COMMAND_HEADER);
+
+                    for (PucmanCommand child : this.childCommands) {
+                        content.add(this.COMMAND_ENTRY.replace("{commandusage}", child.getCommandPath()).replace("{commanddescription}", child.getDescription()));
+                    }
+                }
+
+                LinkedListMultimap<Integer, String> pages = Format.paginate(String.class, content, null, null, 5);
+
+                if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
+                    Sender.send(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
+                } else {
+                    Sender.send(sender, pages.get(1));
+                }
+
+                return false;
+            }
+
+            for (PucmanCommand child : this.parentCommands) {
+                if (!child.isAlias(args[0])) {
+                    continue;
+                }
+
+                LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
+                newArgs.remove(args[0]);
+                child.execute(sender, newArgs);
+                return false;
+            }
+
+            if (args.length - 1 < this.getRequiredArgumentFields().size()) {
+                Sender.send(sender, this.NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", this.getCommandUsage()));
+                return false;
+            }
+
+            LinkedList<String> newArgs = Lists.newLinkedList();
+            newArgs.remove(args[0]);
+
+            //TODO look into a proper way to do this.
+        }
+        return true;
     }
 
     /**
