@@ -11,8 +11,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.bukkit.plugin.java.JavaPlugin;
+import sun.security.krb5.Config;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -24,8 +26,10 @@ import java.nio.file.StandardCopyOption;
 /**
  * Wrapper for managing files,
  */
-@ParametersAreNonnullByDefault
+
 @Getter
+@ThreadSafe
+@ParametersAreNonnullByDefault
 public class BaseFile
 {
     private JavaPlugin instance;
@@ -66,7 +70,7 @@ public class BaseFile
         }
 
         if (this.configuration == null) {
-            this.configuration = TryUtil.sneaky(() -> ConfigurationProvider.getProvider(provider).load(this.file));
+            this.configuration = TryUtil.sneaky(() -> ConfigurationProvider.getProvider(provider).load(this.file), Configuration.class);
         }
     }
 
@@ -74,7 +78,7 @@ public class BaseFile
      * Populates fields within the class with the value corresponding to the key set in the ConfigPopulate annotation.
      * @param clazz - the class.
      */
-    public void populate(Class<?> clazz)
+    public synchronized void populate(Class<?> clazz)
     {
         for (Field f : clazz.getFields()) {
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {

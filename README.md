@@ -13,7 +13,6 @@
 
 ##TODOs
 - Pucman Bukkit Library
-  * Block Action Mapping - Mapping an action to a block in a world that is invoked when an event relating to that block.
   * NMS Library - net.minecraft.server library.
   * Conversation Library - a better conversation API than is currently available in the Spigot API.
   * Player Lookup Library Section - to get and cache players properties from the mojang servers.

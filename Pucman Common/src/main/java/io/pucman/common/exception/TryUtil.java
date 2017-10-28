@@ -18,7 +18,7 @@ public final class TryUtil
     }
 
     @SneakyThrows
-    public static <T> T sneaky(TrySupplier<T> supplier)
+    public static <T> T sneaky(TrySupplier<T> supplier, Class<T> type)
     {
         return supplier.get();
     }

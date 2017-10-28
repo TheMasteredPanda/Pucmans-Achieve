@@ -4,9 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Singleton;
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.server.PLibrary;
-import io.pucman.server.locale.Locale;
 import io.pucman.server.manager.Manager;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -38,6 +36,18 @@ public class BlockMappingManger extends Manager<PLibrary>
     public void onEnable()
     {
         this.handles = ArrayListMultimap.create();
+    }
+
+
+    @Override
+    public void onDisable()
+    {
+        try {
+            lock.writeLock().lock();
+            this.handles.clear();
+        } finally {
+            lock.readLock().lock();
+        }
     }
 
     public void set(Block block, Action action, Class<? extends Event> event)

@@ -32,7 +32,6 @@ public abstract class ConfigurationProvider
     /**
      * List of loading methods.
      */
-
     public abstract void save(Configuration config, File file) throws IOException;
 
     public abstract void save(Configuration config, Writer writer);

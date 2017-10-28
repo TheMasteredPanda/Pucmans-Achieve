@@ -3,13 +3,16 @@ package io.pucman.server.locale;
 import com.google.common.collect.LinkedListMultimap;
 import io.pucman.common.exception.UtilException;
 import io.pucman.common.generic.GenericUtil;
+import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.List;
 
 /**
  * To format objects easily, often strings or BaseComponents.
  */
+@ThreadSafe
 public final class Format
 {
     private Format()
@@ -38,7 +41,7 @@ public final class Format
      * @param <T> - the generic type.
      * @return a linked list multimap with the structure <pageNumber, LinkedList<T>>
      */
-    public static <T> LinkedListMultimap<Integer, T> paginate(Class<T> value, List<T> content, T header, T footer, int contentPerPage)
+    public static <T> LinkedListMultimap<Integer, T> paginate(@NonNull Class<T> value, @NonNull List<T> content, T header, T footer, @NonNull int contentPerPage)
     {
         LinkedListMultimap<Integer, T> pages = LinkedListMultimap.create();
         int contentCount = 0;

@@ -2,8 +2,10 @@ package io.pucman.server.command;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import io.pucman.common.exception.TrySupplier;
+import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.exception.TryUtil;
 import io.pucman.common.math.NumberUtil;
 import io.pucman.server.PLibrary;
@@ -18,9 +20,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Map;
+
 
 /**
  * Wrapper for the bungee Command class. Handles most of the conditions for the benefit
@@ -49,6 +54,7 @@ import java.util.Map;
  * as required argument fields, fields that are required in order for the command to run.
  *
  */
+@NotThreadSafe
 public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExecutor
 {
     /**
@@ -227,11 +233,15 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
      */
     public void addParentCommand(PucmanCommand... commands)
     {
-        for (PucmanCommand parent : commands) {
-            if (!this.isParentCommand(parent) && !this.isChildCommand(parent) && parent != null) {
-                this.parentCommands.add(parent);
-                parent.addChildCommand(this);
+        try {
+            for (PucmanCommand parent : commands) {
+                if (!this.isParentCommand(parent) && !this.isChildCommand(parent) && parent != null) {
+                    this.parentCommands.add(parent);
+                    parent.addChildCommand(this);
+                }
             }
+        } finally {
+
         }
     }
 
@@ -373,6 +383,52 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
 
             LinkedList<String> newArgs = Lists.newLinkedList();
             newArgs.remove(args[0]);
+
+            switch (this.state) {
+                case 0: {
+                    CommandResponse response = this.execute(sender, newArgs);
+
+                    if (response.getType() == CommandResponse.Type.SUCCESS) {
+                        this.onSuccess(response.getSender(), response.getData(), response.getArguments());
+                    } else {
+                        this.onFailure(response.getSender(), response.getData(), response.getArguments());
+                    }
+                    break;
+                }
+
+                case 1: {
+                    ListenableFuture<CommandResponse> future = this.manager.getService().submit(() -> this.execute(sender, newArgs));
+                    CommandResponse response = TryUtil.sneaky(future::get, CommandResponse.class);
+
+                    if (response.getType() == CommandResponse.Type.SUCCESS) {
+                        this.onSuccess(response.getSender(), response.getData(), response.getArguments());
+                    } else {
+                        this.onFailure(response.getSender(), response.getData(), response.getArguments());
+                    }
+                }
+
+                case 2: {
+                    ListenableFuture<CommandResponse> future = this.manager.getService().submit(() -> this.execute(sender, newArgs));
+                    Futures.addCallback(future, new FutureCallback<CommandResponse>()
+                    {
+                        @Override
+                        public void onSuccess(@Nullable CommandResponse response)
+                        {
+                            if (response.getType() == CommandResponse.Type.SUCCESS) {
+                                PucmanCommand.this.onSuccess(response.getSender(), response.getData(), response.getArguments());
+                            } else {
+                                PucmanCommand.this.onFailure(response.getSender(), response.getData(), response.getArguments());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable throwable)
+                        {
+                            throw new DeveloperException(throwable);
+                        }
+                    });
+                }
+            }
 
             //TODO look into a proper way to do this.
         }

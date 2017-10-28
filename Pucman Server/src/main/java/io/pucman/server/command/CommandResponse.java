@@ -3,7 +3,11 @@ package io.pucman.server.command;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.command.CommandSender;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,10 +15,14 @@ import java.util.Map;
  *
  * @see PucmanCommand
  */
-@RequiredArgsConstructor
+
 @Getter
+@RequiredArgsConstructor
+@ParametersAreNonnullByDefault
 public class CommandResponse
 {
+    private final CommandSender sender;
+    private final LinkedList<String> arguments;
     private final Type type;
     private Map<String, Object> data = Maps.newHashMap();
 
