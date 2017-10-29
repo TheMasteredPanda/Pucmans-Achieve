@@ -31,7 +31,7 @@ public abstract class Action<I>
 
     public abstract void ask();
 
-    public abstract boolean validate(I inputType);
+    public abstract boolean validate(Object inputType);
 
     public abstract Action onValidationSuccess(I input);
 

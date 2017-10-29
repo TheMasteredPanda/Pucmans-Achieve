@@ -9,7 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public abstract class ChatAction<P extends JavaPlugin> extends Action<String> implements Listener
+public abstract class ChatAction<P extends JavaPlugin, V> extends Action<V> implements Listener
 {
     private ConversationContext<P, ConversablePlayer> conversationContext = this.getContext();
     private ConversablePlayer player = conversationContext.getForWhom();
@@ -29,12 +29,12 @@ public abstract class ChatAction<P extends JavaPlugin> extends Action<String> im
             return;
         }
 
-        if (this.player.getActiveConversation().validateInput(e.getMessage())) {
-            this.player.getActiveConversation().initiateNextAction();
+
+        if (!e.getMessage().equals("")) {
+            this.validate(e.getMessage());
         }
 
         HandlerList.unregisterAll(this);
     }
-
 
 }
