@@ -85,4 +85,10 @@ public class ConversablePlayer extends PlayerWrapper implements Conversable
             this.get().sendMessage(Format.color(message));
         }
     }
+
+    @Override
+    public Conversation getActiveConversation()
+    {
+        return this.conversationQueue.peek();
+    }
 }

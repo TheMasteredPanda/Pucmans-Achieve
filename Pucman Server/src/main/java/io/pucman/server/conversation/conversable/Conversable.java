@@ -16,4 +16,6 @@ public interface Conversable
     void dropAllConversations();
 
     void send(String message, boolean colored);
+
+    Conversation getActiveConversation();
 }

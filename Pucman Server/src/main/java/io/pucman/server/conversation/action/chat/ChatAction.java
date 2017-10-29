@@ -29,8 +29,8 @@ public abstract class ChatAction<P extends JavaPlugin> extends Action<String> im
             return;
         }
 
-        if (this.player.getCurrentConversation().validateInput(e.getMessage())) {
-            this.player.getCurrentConversation().initiateNextAction();
+        if (this.player.getActiveConversation().validateInput(e.getMessage())) {
+            this.player.getActiveConversation().initiateNextAction();
         }
 
         HandlerList.unregisterAll(this);
