@@ -18,10 +18,9 @@ import java.util.Map;
 @NotThreadSafe
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class ConversationContext<P extends JavaPlugin>
+public class ConversationContext<P extends JavaPlugin, C extends Conversable>
 {
-    private final Conversable forWhom;
+    private final C forWhom;
     private final P instance;
-    private Map<String, Object> context = Maps.newHashMap();
-
+    private Map<String, Object> data = Maps.newHashMap();
 }

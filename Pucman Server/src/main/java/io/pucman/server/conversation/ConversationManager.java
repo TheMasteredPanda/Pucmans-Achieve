@@ -8,9 +8,9 @@ import io.pucman.server.manager.Manager;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class ConversationManager extends Manager<PLibrary>
+public class ConversationManager<C extends Conversable> extends Manager<PLibrary>
 {
-    private HashMap<UUID, Conversable> conversables = Maps.newHashMap();
+    private HashMap<UUID, C> conversables = Maps.newHashMap();
 
     public ConversationManager(PLibrary instance, Priority priority)
     {

@@ -1,8 +1,10 @@
 package io.pucman.server.conversation;
 
+import io.pucman.server.conversation.action.Action;
+
 public interface ConversationCanceller
 {
     boolean validate(Object input);
 
-    boolean onCancel(ConversationContext context);
+    Action onCancel(ConversationContext context);
 }

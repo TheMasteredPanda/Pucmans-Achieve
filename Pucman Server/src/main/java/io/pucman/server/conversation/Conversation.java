@@ -87,8 +87,7 @@ public class Conversation<P extends JavaPlugin>
             if (!this.cancellers.isEmpty()) {
                 for (ConversationCanceller canceller : this.cancellers) {
                     if (canceller.validate(input)) {
-                        canceller.onCancel(context);
-                        this.currentAction = Action.END_OF_CONVERSATION;
+                        this.currentAction = canceller.onCancel(context);
                         return false;
                     }
                 }
