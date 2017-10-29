@@ -1,10 +1,8 @@
 package io.pucman.server.conversation.action.chat;
 
-import org.bukkit.plugin.java.JavaPlugin;
-
 import java.util.regex.Pattern;
 
-public abstract class RegexAction<P extends JavaPlugin> extends ChatAction
+public abstract class RegexAction extends ChatAction
 {
     private Pattern pattern;
 

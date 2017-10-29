@@ -14,6 +14,6 @@ public abstract class MultipleAnswerAction extends ChatAction
     @Override
     public boolean validate(Object inputType)
     {
-        return this.answers.contains(inputType);
+        return this.answers.contains((String) inputType);
     }
 }
