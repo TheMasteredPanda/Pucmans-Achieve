@@ -2,7 +2,7 @@ package io.pucman.server;
 
 import io.pucman.server.block.BlockMappingManger;
 import io.pucman.server.command.CommandManager;
-import io.pucman.server.manager.Manager;
+import io.pucman.server.conversation.ConversationManager;
 import io.pucman.server.manager.ManagingPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -16,7 +16,7 @@ public class PLibrary extends ManagingPlugin
     public void onLoad()
     {
         instance = this;
-        this.load(new CommandManager<>(this), new BlockMappingManger(this, Manager.Priority.HIGH));
+        this.load(new CommandManager<>(this), new BlockMappingManger(this), new ConversationManager(this));
     }
 
     @Override

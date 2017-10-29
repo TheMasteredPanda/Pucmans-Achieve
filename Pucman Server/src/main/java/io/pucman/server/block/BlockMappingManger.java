@@ -26,9 +26,9 @@ public class BlockMappingManger extends Manager<PLibrary>
     private ArrayListMultimap<Block, MappedBlock> handles;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public BlockMappingManger(PLibrary instance, Priority priority)
+    public BlockMappingManger(PLibrary instance)
     {
-        super(instance, priority);
+        super(instance, Priority.HIGH);
         this.instance.getPluginManager().registerEvents(new BlockMappingListener(), this.instance);
     }
 

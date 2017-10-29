@@ -19,9 +19,9 @@ public class ConversationManager<C extends Conversable> extends Manager<PLibrary
 {
     private HashMap<UUID, C> conversables;
 
-    public ConversationManager(PLibrary instance, Priority priority)
+    public ConversationManager(PLibrary instance)
     {
-        super(instance, priority);
+        super(instance, Priority.HIGH);
         conversables = Maps.newHashMap();
     }
 
