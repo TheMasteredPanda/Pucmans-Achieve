@@ -1,8 +1,8 @@
 package io.pucman.server.conversation.action;
 
 import io.pucman.server.conversation.ConversationContext;
-import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
 public abstract class Action<I>
 {
@@ -11,16 +11,22 @@ public abstract class Action<I>
     @Getter
     private ConversationContext context;
 
-    @Getter
+    @Getter @Setter
     private boolean awaitingInput = false;
 
-    @Getter
     private boolean started = false;
+
+    public boolean hasStarted()
+    {
+        return this.started;
+    }
 
     public void init(ConversationContext context)
     {
         this.context = context;
         this.ask();
+        this.awaitingInput = true;
+        this.started = true;
     }
 
     public abstract void ask();

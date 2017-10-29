@@ -84,6 +84,7 @@ public class Conversation<P extends JavaPlugin>
     public boolean validateInput(Object input)
     {
         if (this.currentAction != null) {
+            this.currentAction.setAwaitingInput(false);
             if (!this.cancellers.isEmpty()) {
                 for (ConversationCanceller canceller : this.cancellers) {
                     if (canceller.validate(input)) {
