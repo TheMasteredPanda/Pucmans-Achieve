@@ -11,7 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Map;
 
 @Getter
 public class Conversation<P extends JavaPlugin>
@@ -47,7 +46,7 @@ public class Conversation<P extends JavaPlugin>
         }
 
         if (event != null) {
-            event.abandon(context, state);
+            this.abandon(this.event);
         } else {
             this.abandon(new DefaultConversationAbandonEvent());
         }
@@ -55,11 +54,13 @@ public class Conversation<P extends JavaPlugin>
 
     public void abandon(ConversationEndedEvent event)
     {
-        if (this.currentAction != null) {
-            this.state = State.ABANDONED;
-        }
+        if (this.state == State.STARTED || this.state == State.RUNNING) {
+            if (this.currentAction != null) {
+                this.state = State.ABANDONED;
+            }
 
-        event.abandon(context, state);
+            event.abandon(context, state);
+        }
     }
 
     public void addCancellers(ConversationCanceller... cancellers)
@@ -67,14 +68,10 @@ public class Conversation<P extends JavaPlugin>
         this.cancellers.addAll(Arrays.asList(cancellers));
     }
 
-    public void begin(Conversable conversable, Map<String, Object> initialSessionData)
+    public void begin(Conversable conversable)
     {
         if (currentAction == null) {
-            if (initialSessionData == null || initialSessionData.isEmpty()) {
-                this.context = new ConversationContext<>(conversable, this.instance);
-            } else {
-                this.context = new ConversationContext<>(conversable, this.instance, initialSessionData);
-            }
+            this.context = new ConversationContext<>(conversable, this.instance);
             this.currentAction = firstAction;
             this.context.getForWhom().beginConversation(this);
             this.state = State.STARTED;

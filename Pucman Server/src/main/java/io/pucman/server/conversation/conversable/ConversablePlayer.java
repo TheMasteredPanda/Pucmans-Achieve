@@ -3,6 +3,7 @@ package io.pucman.server.conversation.conversable;
 import com.google.common.collect.Queues;
 import io.pucman.server.PLibrary;
 import io.pucman.server.conversation.Conversation;
+import io.pucman.server.conversation.event.ConversationEndedEvent;
 import io.pucman.server.conversation.event.ForciblyDroppedAllConversationsAbandonEvent;
 import io.pucman.server.locale.Format;
 import io.pucman.server.player.PlayerWrapper;
@@ -17,7 +18,6 @@ import java.util.logging.Level;
 @Getter
 public class ConversablePlayer extends PlayerWrapper implements Conversable
 {
-    private Conversation currentConversation;
     private Queue<Conversation> conversationQueue = Collections.asLifoQueue(Queues.newArrayDeque());
 
     public ConversablePlayer(Player player)
@@ -33,26 +33,31 @@ public class ConversablePlayer extends PlayerWrapper implements Conversable
     @Override
     public boolean isConversing()
     {
-        return this.currentConversation != null;
+        return !this.conversationQueue.isEmpty();
     }
 
     @Override
     public void beginConversation(Conversation conversation)
     {
-        if (this.currentConversation != null) {
+        if (!this.conversationQueue.isEmpty()) {
             this.conversationQueue.add(conversation);
+            this.conversationQueue.peek().begin(this);
+            conversation.getContext().getInstance().getLogger().log(Level.INFO, "Added conversation to conversation queue.");
         } else {
-            this.currentConversation = conversation;
-
+            this.conversationQueue.add(conversation);
         }
     }
 
     @Override
-    public void dropConversation(Conversation conversation)
+    public void dropConversation(Conversation conversation, ConversationEndedEvent endedEvent)
     {
-        if (this.currentConversation != null) {
-            this.conversationQueue.add(conversation);
-            conversation.getContext().getInstance().getLogger().log(Level.INFO, "Added conversation to conversation queue.");
+        if (this.conversationQueue.peek() == conversation) {
+            this.conversationQueue.peek().abandon(endedEvent);
+            this.conversationQueue.remove();
+        }
+
+        if (!this.conversationQueue.isEmpty()) {
+            this.conversationQueue.peek().begin(this);
         }
     }
 
@@ -60,7 +65,7 @@ public class ConversablePlayer extends PlayerWrapper implements Conversable
     public void dropAllQueuedConversations()
     {
         if (!this.conversationQueue.isEmpty()) {
-            this.conversationQueue.clear();
+            this.conversationQueue.forEach(conversation -> conversation.abandon(new ForciblyDroppedAllConversationsAbandonEvent()));
         }
     }
 
@@ -68,15 +73,8 @@ public class ConversablePlayer extends PlayerWrapper implements Conversable
     public void dropAllConversations()
     {
         this.dropAllQueuedConversations();
-        this.getCurrentConversation().abandon(new ForciblyDroppedAllConversationsAbandonEvent());
     }
 
-    @Override
-    public Conversation getNextQueuedConversation()
-    {
-        //Make sure this is the right method to use to view the next element in the queue, not view and remove it from the queue.
-        return this.conversationQueue.peek();
-    }
 
     @Override
     public void send(String message, boolean colored)
