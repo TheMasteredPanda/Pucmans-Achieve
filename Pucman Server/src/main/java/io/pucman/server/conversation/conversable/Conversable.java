@@ -12,6 +12,8 @@ public interface Conversable
 
     void dropAllQueuedConversations();
 
+    void dropAllConversations();
+
     Conversation getNextQueuedConversation();
 
     void send(String message, boolean colored);

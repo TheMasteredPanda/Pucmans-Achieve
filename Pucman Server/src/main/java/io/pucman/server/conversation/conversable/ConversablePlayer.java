@@ -59,7 +59,16 @@ public class ConversablePlayer extends PlayerWrapper implements Conversable
     @Override
     public void dropAllQueuedConversations()
     {
-        this.currentConversation.abandon(new ForciblyDroppedAllConversationsAbandonEvent());
+        if (!this.conversationQueue.isEmpty()) {
+            this.conversationQueue.clear();
+        }
+    }
+
+    @Override
+    public void dropAllConversations()
+    {
+        this.dropAllQueuedConversations();
+        this.getCurrentConversation().abandon(new ForciblyDroppedAllConversationsAbandonEvent());
     }
 
     @Override
