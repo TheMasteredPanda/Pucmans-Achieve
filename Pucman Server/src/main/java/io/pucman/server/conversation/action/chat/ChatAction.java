@@ -21,14 +21,9 @@ public abstract class ChatAction<P extends JavaPlugin, V> extends Action<V> impl
             return;
         }
 
-        if (!this.hasStarted()) {
+        if (!this.hasStarted() || !this.isAwaitingInput()) {
             return;
         }
-
-        if (!this.isAwaitingInput()) {
-            return;
-        }
-
 
         if (!e.getMessage().equals("")) {
             this.validate(e.getMessage());
