@@ -3,6 +3,9 @@ package io.pucman.server.conversation.event;
 import io.pucman.server.conversation.Conversation;
 import io.pucman.server.conversation.ConversationContext;
 
+/**
+ * @see ForciblyDroppedAllConversationsAbandonEvent
+ */
 public class ForciblyDroppedAllConversationsAbandonEvent implements ConversationEndedEvent
 {
     @Override

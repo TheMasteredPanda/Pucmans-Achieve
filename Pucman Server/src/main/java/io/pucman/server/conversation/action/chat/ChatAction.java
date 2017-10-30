@@ -9,6 +9,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * Base class for actions that work in chat only.
+ * @param <P> - Plugin type this action belongs to.
+ * @param <V> - Input type of this action.
+ *
+ * @see Action
+ */
 public abstract class ChatAction<P extends JavaPlugin, V> extends Action<V> implements Listener
 {
     private ConversationContext<P, ConversablePlayer> conversationContext = this.getContext();
@@ -26,7 +33,7 @@ public abstract class ChatAction<P extends JavaPlugin, V> extends Action<V> impl
         }
 
         if (!e.getMessage().equals("")) {
-            this.validate(e.getMessage());
+            player.getActiveConversation().validateInput(e.getMessage());
         }
 
         HandlerList.unregisterAll(this);

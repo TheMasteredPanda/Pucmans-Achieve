@@ -20,7 +20,18 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ConversationContext<P extends JavaPlugin, C extends Conversable>
 {
+    /**
+     * Conversable this context pertains to.
+     */
     private final C forWhom;
+
+    /**
+     * Plugin instance this context belongs to..
+     */
     private final P instance;
+
+    /**
+     * Conversation session data that is passed from conversation action to conversation action.
+     */
     private Map<String, Object> data = Maps.newHashMap();
 }

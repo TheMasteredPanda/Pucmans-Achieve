@@ -15,6 +15,9 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.logging.Level;
 
+/**
+ * @see Conversable
+ */
 @Getter
 public class ConversablePlayer extends PlayerWrapper implements Conversable
 {
@@ -39,9 +42,10 @@ public class ConversablePlayer extends PlayerWrapper implements Conversable
     @Override
     public void beginConversation(Conversation conversation)
     {
+
         if (!this.conversationQueue.isEmpty()) {
             this.conversationQueue.add(conversation);
-            this.conversationQueue.peek().begin(this);
+            this.conversationQueue.peek().begin();
             conversation.getContext().getInstance().getLogger().log(Level.INFO, "Added conversation to conversation queue.");
         } else {
             this.conversationQueue.add(conversation);
@@ -57,7 +61,7 @@ public class ConversablePlayer extends PlayerWrapper implements Conversable
         }
 
         if (!this.conversationQueue.isEmpty()) {
-            this.conversationQueue.peek().begin(this);
+            this.conversationQueue.peek().begin();
         }
     }
 
@@ -80,9 +84,9 @@ public class ConversablePlayer extends PlayerWrapper implements Conversable
     public void send(String message, boolean colored)
     {
         if (!colored) {
-            this.get().sendMessage(message);
+            this.get().sendMessage(this.getActiveConversation().isEchoInput() ? this.getActiveConversation().getPrefix() + " " + message : message);
         } else {
-            this.get().sendMessage(Format.color(message));
+            this.get().sendMessage(Format.color(this.getActiveConversation().isEchoInput() ? this.getActiveConversation().getPrefix() + " " + message : message));
         }
     }
 

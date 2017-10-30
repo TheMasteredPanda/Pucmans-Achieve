@@ -15,6 +15,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.HashMap;
 import java.util.UUID;
 
+/**
+ * Conversation Manager, managers the conversable instances.
+ * @param <C>
+ */
 public class ConversationManager<C extends Conversable> extends Manager<PLibrary> implements Listener
 {
     private HashMap<UUID, C> conversables;
@@ -38,6 +42,11 @@ public class ConversationManager<C extends Conversable> extends Manager<PLibrary
 
     }
 
+    /**
+     * Registers a player.
+     * @param uuid - the player.
+     * @param conversable - the conversable instance.
+     */
     public void register(UUID uuid, Conversable conversable)
     {
         if (!this.conversables.containsKey(uuid)) {
@@ -45,6 +54,10 @@ public class ConversationManager<C extends Conversable> extends Manager<PLibrary
         }
     }
 
+    /**
+     * Unregisters a player.
+     * @param uuid - the player.
+     */
     public void unregister(UUID uuid)
     {
         if (!this.conversables.containsKey(uuid)) {

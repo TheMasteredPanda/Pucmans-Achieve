@@ -8,6 +8,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockEvent;
 
+/**
+ * Base class for actions that work with blocks only.
+ * @param <E> - used in specifying the correct parameter
+ *          type in the method declaration at the bottom.
+ *
+ * @see Action
+ */
 public abstract class BlockAction<E extends BlockEvent> extends Action<Block> implements Listener
 {
     private Conversable conversable = this.getContext().getForWhom();
