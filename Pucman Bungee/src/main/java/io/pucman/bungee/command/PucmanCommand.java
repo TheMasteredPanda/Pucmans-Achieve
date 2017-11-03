@@ -55,6 +55,11 @@ import java.util.stream.Collectors;
 public abstract class PucmanCommand<P extends Plugin> extends Command
 {
     /**
+     * Instance of the main library class.
+     */
+    PLibrary lib = PLibrary.get();
+
+    /**
      * Instance of the plugin passed in the constructors.
      */
     protected P instance;
@@ -107,26 +112,26 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
     /**
      * The following fields are primarily locale.
      */
-    @ConfigPopulate(value = "PlayerOnlyCommand", format = true)
-    private String PLAYER_ONLY_COMMAND;
+    @ConfigPopulate(value = "Plugin.Command.PlayerOnlyCommand", format = true)
+    public String PLAYER_ONLY_COMMAND;
 
-    @ConfigPopulate(value = "NoPermission", format = true)
-    private String NO_PERMISSION;
+    @ConfigPopulate(value = "Plugin.Command.NoPermission", format = true)
+    public String NO_PERMISSION;
 
-    @ConfigPopulate(value = "NotEnoughArguments", format = true)
-    private String NOT_ENOUGH_ARGUMENTS;
+    @ConfigPopulate(value = "Plugin.Command.NotEnoughArguments", format = true)
+    public String NOT_ENOUGH_ARGUMENTS;
 
-    @ConfigPopulate(value = "IncorrectArgumentInput", format = true)
-    protected String INCORRECT_ARGUMENT_INPUT;
+    @ConfigPopulate(value = "Plugin.Command.IncorrectArgumentInput", format = true)
+    public String INCORRECT_ARGUMENT_INPUT;
 
-    @ConfigPopulate(value = "ParentCommandHeader", color = true)
-    private String PARENT_COMMAND_HEADER;
+    @ConfigPopulate(value = "Plugin.Command.ParentCommandHeader", color = true)
+    public String PARENT_COMMAND_HEADER;
 
-    @ConfigPopulate(value = "ChildCommandHeader", color = true)
-    private String CHILD_COMMAND_HEADER;
+    @ConfigPopulate(value = "Plugin.Command.ChildCommandHeader", color = true)
+    public String CHILD_COMMAND_HEADER;
 
-    @ConfigPopulate(value = "CommandEntry", color = true)
-    private String COMMAND_ENTRY;
+    @ConfigPopulate(value = "Plugin.Command.CommandEntry", color = true)
+    public String COMMAND_ENTRY;
 
     /**
      * Instance of the command manager.
@@ -151,7 +156,7 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
     {
         super(name, permission, aliases);
         this.instance = instance;
-        locale.populate(this.getClass());
+        locale.populate(this.getClass(), this);
 
         if (description != null) {
             this.description = description;
@@ -311,24 +316,28 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
     @Override
     public void execute(CommandSender sender, String[] args)
     {
-        this.instance.getLogger().info("Invoked " + this.getName());
 
         if (this.isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
+            this.lib.debug(this, "Is player only command.");
             Sender.send(sender, this.PLAYER_ONLY_COMMAND);
             return;
         }
 
         if (!this.hasPermission(sender)) {
+            this.lib.debug(this, "No permission.");
             Sender.send(sender, this.NO_PERMISSION);
             return;
         }
 
-        if (args.length > 1) {
+        if (args.length >= 1) {
+            this.lib.debug(this, "Argument length is bigger or equal than 1.");
             if (args[0].equalsIgnoreCase("help")) {
+                this.lib.debug(this, "First argument is 'help'");
                 LinkedList<String> content = Lists.newLinkedList();
                 content.add(this.PARENT_COMMAND_HEADER.replace("{commandusage}", this.getCommandUsage()).replace("{commanddescrption}", this.getDescription()));
 
                 if (this.childCommands.size() > 0) {
+                    this.lib.debug(this, "Invoked command has child commands.");
                     content.add(this.CHILD_COMMAND_HEADER);
 
                     for (PucmanCommand child : this.childCommands) {
@@ -336,29 +345,41 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
                     }
                 }
 
+                this.lib.debug(this, "Paginating.");
                 LinkedListMultimap<Integer, String> pages = Format.paginateString(content, null, null, 5);
 
                 if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
+                    this.lib.debug(this, "2 argument was found and parsable as an integer.");
                     Sender.send(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
                 } else {
+                    this.lib.debug("No second argument found, printing first page.");
                     Sender.send(sender, pages.get(1));
                 }
                 return;
             }
 
-            for (PucmanCommand child : this.childCommands) {
-                if (!child.isAlias(args[0])) {
-                    continue;
-                }
+            this.lib.debug(this, "Checking if the second argument is a child command.");
+            if (this.childCommands.size() > 0) {
+                for (PucmanCommand child : this.childCommands) {
+                    if (!child.isAlias(args[0])) {
+                        this.lib.debug(this, child.getName() + " is not the second argument.");
+                        continue;
+                    }
 
-                LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
-                newArgs.remove(args[0]);
-                child.execute(sender, newArgs.toArray(new String[newArgs.size()]));
-                return;
+                    this.lib.debug(this, child.getName() + " is the second argument.");
+                    LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
+                    newArgs.remove(args[0]);
+                    this.lib.debug(this, "Invoking constructor of command " + child.getName() + ".");
+                    child.execute(sender, newArgs.toArray(new String[newArgs.size()]));
+                    return;
+                }
             }
+        } else {
+            this.lib.debug(this, "There are no arguments.");
         }
 
         if (args.length < this.getRequiredArgumentFields().size()) {
+            this.lib.debug("Required arguments not found.");
             Sender.send(sender, this.NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", this.getCommandUsage()));
             return;
         }
@@ -367,6 +388,7 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
 
         switch (this.state) {
             case 2: {
+                this.lib.debug(this, "Running command bodies in full async mode.");
                 ListenableFuture<CommandResponse> fullFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
                 Futures.addCallback(fullFuture, new FutureCallback<CommandResponse>()
                 {
@@ -374,8 +396,10 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
                     public void onSuccess(@Nullable CommandResponse response)
                     {
                         if (response.getType() == CommandResponse.Type.SUCCESS) {
+                            PucmanCommand.this.lib.debug(this, "The command was successfully executed.");
                             PucmanCommand.this.onSuccess(response.getSender(), response.getData(), response.getArguments());
                         } else {
+                            PucmanCommand.this.lib.debug(this, "The command did not execute successfully.");
                             PucmanCommand.this.onFailure(response.getSender(), response.getData(), response.getArguments());
                         }
                     }
@@ -389,23 +413,29 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
             }
 
             case 1: {
+                this.lib.debug(this, "Running command bodies in semi async mode.");
                 ListenableFuture<CommandResponse> semiFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
                 CommandResponse semiResponse = TryUtil.sneaky(semiFuture::get, CommandResponse.class);
 
                 if (semiResponse.getType() == CommandResponse.Type.SUCCESS) {
+                    this.lib.debug(this, "The command was successfully executed.");
                     this.onSuccess(sender, semiResponse.getData(), newArgs);
                 } else {
+                    this.lib.debug(this, "The command did not execute successfully.");
                     this.onFailure(sender, semiResponse.getData(), newArgs);
                 }
                 return;
             }
 
             case 0: {
+                this.lib.debug(this, "Not running command bodies in async mode of any capacity.");
                 CommandResponse noneResponse = this.execute(sender, newArgs);
 
                 if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
+                    this.lib.debug(this, "The command was successfully executed.");
                     this.onSuccess(sender, noneResponse.getData(), newArgs);
                 } else {
+                    this.lib.debug(this, "The command did not execute successfully.");
                     this.onFailure(sender, noneResponse.getData(), newArgs);
                 }
             }
