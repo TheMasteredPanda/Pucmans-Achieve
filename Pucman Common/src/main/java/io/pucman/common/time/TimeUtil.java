@@ -49,7 +49,6 @@ public final class TimeUtil
         if (seconds > 0L) string = string + (!string.isEmpty() ? ", " : "") + seconds + (seconds == 1L ? " second" : shorten ? "s" : " seconds");
         if (milliseconds > 0L) string = string + (!string.isEmpty() ? ", " : "") + milliseconds + (seconds == 1L ? " millisecond" : shorten ? "ms" : " milliseconds");
         if (string.isEmpty()) string = "0" + (shorten ? "ms" : " millisecond");
-
         return string;
     }
 }

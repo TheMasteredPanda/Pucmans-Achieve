@@ -1,6 +1,7 @@
 package io.pucman.server.conversation.action.chat;
 
 import com.google.common.collect.ImmutableList;
+import io.pucman.common.generic.GenericUtil;
 
 public abstract class MultipleAnswerAction extends ChatAction
 {
@@ -8,7 +9,7 @@ public abstract class MultipleAnswerAction extends ChatAction
 
     public MultipleAnswerAction(String... answers)
     {
-        this.answers = ImmutableList.of(answers);
+        this.answers = GenericUtil.cast(ImmutableList.of(answers));
     }
 
     @Override

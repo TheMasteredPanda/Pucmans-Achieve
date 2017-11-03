@@ -42,6 +42,7 @@ public class CommandManager extends Manager<PLibrary>
     public <P extends Plugin> void register(P instance, PucmanCommand... commands)
     {
         for (PucmanCommand command : commands) {
+            this.instance.getLogger().info("Registering command  /" + command.getName() + ".");
             this.instance.getPluginManager().registerCommand(instance, command);
         }
     }

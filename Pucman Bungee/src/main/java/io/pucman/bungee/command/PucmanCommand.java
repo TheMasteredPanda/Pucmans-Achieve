@@ -10,7 +10,6 @@ import io.pucman.bungee.file.ConfigPopulate;
 import io.pucman.bungee.locale.Format;
 import io.pucman.bungee.locale.Locale;
 import io.pucman.bungee.sender.Sender;
-import io.pucman.common.exception.TrySupplier;
 import io.pucman.common.exception.TryUtil;
 import io.pucman.common.math.NumberUtil;
 import lombok.Getter;
@@ -312,17 +311,15 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
     @Override
     public void execute(CommandSender sender, String[] args)
     {
-        if (!this.isAlias(args[0])) {
-            return;
-        }
+        this.instance.getLogger().info("Invoked " + this.getName());
 
         if (this.isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
-            Sender.sender(sender, this.PLAYER_ONLY_COMMAND);
+            Sender.send(sender, this.PLAYER_ONLY_COMMAND);
             return;
         }
 
         if (!this.hasPermission(sender)) {
-            Sender.sender(sender, this.NO_PERMISSION);
+            Sender.send(sender, this.NO_PERMISSION);
             return;
         }
 
@@ -339,18 +336,17 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
                     }
                 }
 
-                LinkedListMultimap<Integer, String> pages = Format.paginate(String.class, content, null, null, 5);
+                LinkedListMultimap<Integer, String> pages = Format.paginateString(content, null, null, 5);
 
                 if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
-                    Sender.sender(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
+                    Sender.send(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
                 } else {
-                    Sender.sender(sender, pages.get(1));
+                    Sender.send(sender, pages.get(1));
                 }
-
                 return;
             }
 
-            for (PucmanCommand child : this.parentCommands) {
+            for (PucmanCommand child : this.childCommands) {
                 if (!child.isAlias(args[0])) {
                     continue;
                 }
@@ -360,59 +356,57 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
                 child.execute(sender, newArgs.toArray(new String[newArgs.size()]));
                 return;
             }
+        }
 
-            if (args.length - 1 < this.getRequiredArgumentFields().size()) {
-                Sender.sender(sender, this.NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", this.getCommandUsage()));
+        if (args.length < this.getRequiredArgumentFields().size()) {
+            Sender.send(sender, this.NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", this.getCommandUsage()));
+            return;
+        }
+
+        LinkedList<String> newArgs = Lists.newLinkedList();
+
+        switch (this.state) {
+            case 2: {
+                ListenableFuture<CommandResponse> fullFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
+                Futures.addCallback(fullFuture, new FutureCallback<CommandResponse>()
+                {
+                    @Override
+                    public void onSuccess(@Nullable CommandResponse response)
+                    {
+                        if (response.getType() == CommandResponse.Type.SUCCESS) {
+                            PucmanCommand.this.onSuccess(response.getSender(), response.getData(), response.getArguments());
+                        } else {
+                            PucmanCommand.this.onFailure(response.getSender(), response.getData(), response.getArguments());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable)
+                    {
+                    }
+                });
                 return;
             }
 
-            LinkedList<String> newArgs = Lists.newLinkedList();
-            newArgs.remove(args[0]);
+            case 1: {
+                ListenableFuture<CommandResponse> semiFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
+                CommandResponse semiResponse = TryUtil.sneaky(semiFuture::get, CommandResponse.class);
 
-            switch (this.state) {
-                case 2: {
-                    ListenableFuture<CommandResponse> fullFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
-                    Futures.addCallback(fullFuture, new FutureCallback<CommandResponse>()
-                    {
-                        @Override
-                        public void onSuccess(@Nullable CommandResponse response)
-                        {
-                            if (response.getType() == CommandResponse.Type.SUCCESS) {
-                                PucmanCommand.this.onSuccess(response.getSender(), response.getData(), response.getArguments());
-                            } else {
-                                PucmanCommand.this.onFailure(response.getSender(), response.getData(), response.getArguments());
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable throwable)
-                        {
-
-                        }
-                    });
-                    return;
+                if (semiResponse.getType() == CommandResponse.Type.SUCCESS) {
+                    this.onSuccess(sender, semiResponse.getData(), newArgs);
+                } else {
+                    this.onFailure(sender, semiResponse.getData(), newArgs);
                 }
+                return;
+            }
 
-                case 1: {
-                    ListenableFuture<CommandResponse> semiFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
-                    CommandResponse semiResponse = TryUtil.sneaky(semiFuture::get, CommandResponse.class);
+            case 0: {
+                CommandResponse noneResponse = this.execute(sender, newArgs);
 
-                    if (semiResponse.getType() == CommandResponse.Type.SUCCESS) {
-                        this.onSuccess(sender, semiResponse.getData(), newArgs);
-                    } else {
-                        this.onFailure(sender, semiResponse.getData(), newArgs);
-                    }
-                    return;
-                }
-
-                case 0: {
-                    CommandResponse noneResponse = this.execute(sender, newArgs);
-
-                    if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
-                        this.onSuccess(sender, noneResponse.getData(), newArgs);
-                    } else {
-                        this.onFailure(sender, noneResponse.getData(), newArgs);
-                    }
+                if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
+                    this.onSuccess(sender, noneResponse.getData(), newArgs);
+                } else {
+                    this.onFailure(sender, noneResponse.getData(), newArgs);
                 }
             }
         }

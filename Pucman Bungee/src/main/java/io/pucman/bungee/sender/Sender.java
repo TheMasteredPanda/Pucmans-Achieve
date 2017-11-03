@@ -23,7 +23,7 @@ public final class Sender
      * @param sender - the sender.
      * @param message - the string message.
      */
-    public static void sender(CommandSender sender, String message)
+    public static void send(CommandSender sender, String message)
     {
         sender.sendMessage(new TextComponent(message));
     }
@@ -33,7 +33,7 @@ public final class Sender
      * @param sender - the sender.
      * @param messages - the list of messages.
      */
-    public static void sender(CommandSender sender, List<String> messages)
+    public static void send(CommandSender sender, List<String> messages)
     {
         List<TextComponent> components = messages.stream().map(TextComponent::new).collect(Collectors.toCollection(Lists::newLinkedList));
         sender.sendMessage(components.toArray(new TextComponent[components.size()]));

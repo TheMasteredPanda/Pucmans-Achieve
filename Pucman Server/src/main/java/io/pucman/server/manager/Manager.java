@@ -1,7 +1,6 @@
 package io.pucman.server.manager;
 
 import lombok.Getter;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -10,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * library section.
  * @param <P>
  */
-public class Manager<P extends JavaPlugin>
+public class Manager<P extends ManagingPlugin>
 {
     protected P instance;
     private AtomicBoolean enable = new AtomicBoolean(false);

@@ -32,6 +32,7 @@ public abstract class ChatAction<P extends JavaPlugin, V> extends Action<V> impl
             return;
         }
 
+
         if (!e.getMessage().equals("")) {
             player.getActiveConversation().validateInput(e.getMessage());
         }

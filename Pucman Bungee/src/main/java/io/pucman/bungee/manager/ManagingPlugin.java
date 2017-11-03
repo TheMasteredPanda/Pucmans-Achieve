@@ -1,6 +1,7 @@
 package io.pucman.bungee.manager;
 
 import com.google.common.collect.HashMultimap;
+import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.generic.GenericUtil;
 import lombok.Getter;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -30,7 +31,7 @@ public class ManagingPlugin extends Plugin
     /**
      * Enables managers.
      */
-    public void enableManagers()
+    public synchronized void enableManagers()
     {
         this.managers.get(Manager.Priority.HIGH).forEach(Manager::init);
         this.managers.get(Manager.Priority.NORMAL).forEach(Manager::init);
@@ -39,7 +40,7 @@ public class ManagingPlugin extends Plugin
     /**
      * Disables managers.
      */
-    public void disableManagers()
+    public synchronized void disableManagers()
     {
         this.managers.get(Manager.Priority.HIGH).forEach(Manager::shutdown);
         this.managers.get(Manager.Priority.NORMAL).forEach(Manager::shutdown);
@@ -53,6 +54,13 @@ public class ManagingPlugin extends Plugin
      */
     public <M extends Manager> M get(Class<M> manager)
     {
-        return this.managers.values().stream().filter(m -> m.getClass().equals(manager)).findFirst().<M>map(GenericUtil::cast).orElse(null);
+        Manager managerInstance = this.managers.values().stream().filter(m -> m.getClass().equals(manager)).findFirst().<M>map(GenericUtil::cast).orElse(null);
+
+        if (managerInstance== null) {
+            System.out.println("m is null, tried to get " + manager.getName() + " manager. Currency size of loaded managers list is: " + String.valueOf(this.managers.size()));
+            throw new DeveloperException("m is null.");
+        }
+
+        return GenericUtil.cast(managerInstance);
     }
 }

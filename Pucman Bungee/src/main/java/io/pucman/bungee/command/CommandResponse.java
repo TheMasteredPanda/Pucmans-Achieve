@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,8 +13,8 @@ import java.util.Map;
  *
  * @see PucmanCommand
  */
-@RequiredArgsConstructor
 @Getter
+@RequiredArgsConstructor
 public class CommandResponse
 {
     private final CommandSender sender;

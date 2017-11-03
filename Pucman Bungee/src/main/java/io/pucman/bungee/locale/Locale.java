@@ -71,11 +71,11 @@ public class Locale<P extends Plugin> extends BaseFile
             this.setConfiguration(TryUtil.sneaky(() -> ConfigurationProvider.getProvider(this.getProvider()).load(this.getFile()), Configuration.class));
         }
 
-        this.PLUGIN_PREFIX = this.getMessage("Prefix");
-        this.PLUGIN_MESSAGE_FORMAT = this.getMessage("PluginMessageFormat");
-        this.LIST_HEADER_FORMAT = this.getMessage("ListHeaderFormat");
-        this.LIST_FOOTER_FORMAT = this.getMessage("ListFooterFormat");
-        this.PAGE_INDEX_FORMAT = this.getMessage("PageIndexFormat");
+        this.PLUGIN_PREFIX = this.getMessage("Plugin.Prefix");
+        this.PLUGIN_MESSAGE_FORMAT = this.getMessage("Plugin.PluginMessageFormat");
+        this.LIST_HEADER_FORMAT = this.getMessage("Plugin.ListHeaderFormat");
+        this.LIST_FOOTER_FORMAT = this.getMessage("Plugin.ListFooterFormat");
+        this.PAGE_INDEX_FORMAT = this.getMessage("Plugin.PageIndexFormat");
     }
 
     /**
