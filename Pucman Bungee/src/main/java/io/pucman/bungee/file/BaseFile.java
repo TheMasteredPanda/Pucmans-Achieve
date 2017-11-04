@@ -10,6 +10,7 @@ import lombok.SneakyThrows;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
+import net.md_5.bungee.config.YamlConfiguration;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
@@ -48,18 +49,20 @@ public class BaseFile
     public synchronized void load()
     {
         if (!this.getInstance().getDataFolder().exists()) {
+            this.lib.debug(this, "Creating parent directory.");
             this.getInstance().getDataFolder().mkdir();
         }
 
         if (this.getInstance().getResourceAsStream(this.getName()) != null && !this.getFile().exists()) {
+            this.lib.debug(this, "File " + this.getName() + " not found, creating one.");
             InputStream is = this.getInstance().getResourceAsStream(this.getName());
             OutputStream os = new FileOutputStream(this.getFile());
 
             byte[] buffer = new byte[1024];
-            int bytesRead;
+            int read;
 
-            while ((bytesRead = is.read()) != -1) {
-                os.write(buffer, 0, bytesRead);
+            while ((read = is.read(buffer)) != -1) {
+                os.write(buffer, 0, read);
             }
 
             is.close();
@@ -67,17 +70,19 @@ public class BaseFile
         }
 
         if (this.configuration == null) {
-            this.configuration = TryUtil.sneaky(() -> ConfigurationProvider.getProvider(provider).load(this.file), Configuration.class);
+            PLibrary.get().debug(this, "Loading file: " + this.getFile() + " as a configuration file.");
+            this.configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.getFile());
         }
     }
 
     /**
      * Populates fields within the class with the value corresponding to the key set in the ConfigPopulate annotation.
-     * @param clazz - the class.
+     * @param instance - the instance of the class.
      */
-    @Override @SneakyThrows
-    public void populate(Class<?> clazz, Object instance)
+    @SneakyThrows
+    public  <V extends Object> void populate(V instance)
     {
+        Class clazz = instance.getClass();
         this.lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
         for (Field f : clazz.getFields()) {
             this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
@@ -105,11 +110,7 @@ public class BaseFile
             this.lib.debug(this, "Setting the field " + f.getName() + " accessible.");
             f.setAccessible(true);
 
-            if (f.getType().equals(String.class) && annotation.format()) {
-                this.lib.debug(this, "Setting the value as a String, formatted, to field " + f.getName() + ". Type of field: " + f.getType().getName() + ".");
-                f.set(instance, Format.color(this.PLUGIN_MESSAGE_FORMAT.replace("{prefix}", this.PLUGIN_PREFIX).replace("{message}", value)));
-                continue;
-            } else if (f.getType().equals(String.class) && annotation.color()) {
+            if (f.getType().equals(String.class) && annotation.color()) {
                 this.lib.debug(this, "Setting the value as a string, colored, to field " + f.getName() + ".");
                 f.set(instance, Format.color(value));
                 continue;
@@ -128,5 +129,17 @@ public class BaseFile
         if (this.configuration != null && this.file != null) {
             TryUtil.sneaky(() -> ConfigurationProvider.getProvider(provider).save(this.configuration, this.file));
         }
+    }
+
+    /**
+     * To get a value.
+     * @param type - type of value.
+     * @param node - location of value in the file.
+     * @param <T> - generic type.
+     * @return the value if present, else null.
+     */
+    public <T> T get(Class<T> type, String node)
+    {
+        return GenericUtil.cast(this.configuration.get(node), type);
     }
 }

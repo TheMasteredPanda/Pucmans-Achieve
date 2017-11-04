@@ -105,11 +105,12 @@ public class Locale<P extends Plugin> extends BaseFile
 
     /**
      * Same as BaseFile#populate but allows for formatting to be automatically done.
-     * @param clazz - the class.
+     * @param instance - instance of the class.
      */
     @Override @SneakyThrows
-    public void populate(Class<?> clazz, Object instance)
+    public <V extends Object> void populate(V instance)
     {
+        Class clazz = instance.getClass();
         this.lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
         for (Field f : clazz.getFields()) {
             this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
@@ -122,7 +123,7 @@ public class Locale<P extends Plugin> extends BaseFile
 
             ConfigPopulate annotation = f.getAnnotation(ConfigPopulate.class);
 
-            String value = this.getConfiguration().getString(annotation.value(), null);
+            Object value = this.getConfiguration().getString(annotation.value(), null);
 
             if (value == null) {
                 this.lib.debug(this, "Value is null in annotation over " + f.getName() + ".");
@@ -134,21 +135,22 @@ public class Locale<P extends Plugin> extends BaseFile
                 throw new DeveloperException("Value corresponding to key " + annotation.value() + " could not be assigned to field " + f.getName() + " as it's type, " + f.getType().getName() + " could not be casted to the value " + value.toString() + ".");
             }
 
-            this.lib.debug(this, "Setting the field " + f.getName() + " accessible.");
-            f.setAccessible(true);
+            if (f.get(instance) == null) {
+                if (f.getType().equals(String.class) && annotation.format()) {
+                    this.lib.debug(this, "Setting the value as a String, formatted, to field " + f.getName() + ". Type of field: " + f.getType().getName() + ".");
+                    f.set(instance, GenericUtil.cast(Format.color(this.PLUGIN_MESSAGE_FORMAT.replace("{prefix}", this.PLUGIN_PREFIX).replace("{message}", value.toString()))));
+                    continue;
+                }
 
-            if (f.getType().equals(String.class) && annotation.format()) {
-                this.lib.debug(this, "Setting the value as a String, formatted, to field " + f.getName() + ". Type of field: " + f.getType().getName() + ".");
-                f.set(instance, Format.color(this.PLUGIN_MESSAGE_FORMAT.replace("{prefix}", this.PLUGIN_PREFIX).replace("{message}", value)));
-                continue;
-            } else if (f.getType().equals(String.class) && annotation.color()) {
-                this.lib.debug(this, "Setting the value as a string, colored, to field " + f.getName() + ".");
-                f.set(instance, Format.color(value));
-                continue;
+                if (f.getType().equals(String.class) && annotation.color()) {
+                    this.lib.debug(this, "Setting the value as a string, colored, to field " + f.getName() + ".");
+                    f.set(instance, Format.color(value.toString()));
+                    continue;
+                }
+
+                this.lib.debug(this, "Setting field " + f.getName() + ".");
+                TryUtil.sneaky(() -> f.set(instance, value));
             }
-
-            this.lib.debug(this, "Setting field " + f.getName() + ".");
-            TryUtil.sneaky(() -> f.set(instance, value));
         }
     }
 

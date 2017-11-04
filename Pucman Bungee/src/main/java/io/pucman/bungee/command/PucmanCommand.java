@@ -2,15 +2,11 @@ package io.pucman.bungee.command;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.file.ConfigPopulate;
 import io.pucman.bungee.locale.Format;
 import io.pucman.bungee.locale.Locale;
 import io.pucman.bungee.sender.Sender;
-import io.pucman.common.exception.TryUtil;
 import io.pucman.common.math.NumberUtil;
 import lombok.Getter;
 import lombok.NonNull;
@@ -19,7 +15,6 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Map;
@@ -28,20 +23,6 @@ import java.util.stream.Collectors;
 /**
  * Wrapper for the bungee Command class. Handles most of the conditions for the benefit
  * that the developer will not have to write them for every parent and child command.
- * it also has the added benefit of handling asynchronous execution of the command
- * definition. Which is useful if the command body can be executed on another thread.
- *
- * Asynchronous states indicate what level of asynchronous execution the command body
- * will undergo. The following the states are explained as follows:
- *
- * 2 - All three methods (this#execute, this#onFailure, and this#onSuccess) are executed
- * asynchronously on the same thread.
- *
- * 1 - The method body, which would reside in this#execute, would be executed asynchronously,
- * but either methods this#onFailure or this#onSuccess, depending on the response give inside the
- * body of the command, will not be executed asynchronously.
- *
- * 0 - All three methods will not be executed asynchronously in any capacity.
  *
  * @see this#execute(CommandSender, LinkedList)
  * @see this#onSuccess(CommandSender, Map, LinkedList)
@@ -101,13 +82,7 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
      * If true, it is a player only command, otherwise both the console and player can execute it.
      */
     @Getter
-    private boolean playerOnlyCommand;
-
-    /**
-     * Asynchronous state, cannot be null.
-     */
-    @Getter
-    private int state;
+    private boolean playerOnlyCommandBool;
 
     /**
      * The following fields are primarily locale.
@@ -149,31 +124,29 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
      *                   command to not have a permission.
      * @param description - the description of this command.
      * @param playerOnlyCommand - whether this is a command only executable via a player instance.
-     * @param asynchronousState - the asynchronous state of this command, described above.
      * @param aliases - the aliases of this command.
      */
-    public PucmanCommand(@NonNull P instance, @NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, @NonNull int asynchronousState, String... aliases)
+    public PucmanCommand(@NonNull P instance, @NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, String... aliases)
     {
         super(name, permission, aliases);
         this.instance = instance;
-        locale.populate(this.getClass(), this);
+        locale.populate(this);
 
         if (description != null) {
             this.description = description;
         }
 
-        this.playerOnlyCommand = playerOnlyCommand;
-        this.state = asynchronousState;
+        this.playerOnlyCommandBool = playerOnlyCommand;
     }
 
-    public PucmanCommand(P instance, Locale locale, String name, String description, boolean playerOnlyCommand, int state)
+    public PucmanCommand(P instance, Locale locale, String name, String description, boolean playerOnlyCommand)
     {
-        this(instance, locale, name, null, description, playerOnlyCommand, state);
+        this(instance, locale, name, null, description, playerOnlyCommand);
     }
 
-    public PucmanCommand(P instance, Locale locale, String name, String description, int state)
+    public PucmanCommand(P instance, Locale locale, String name, String description)
     {
-        this(instance, locale, name, null, description, false, state);
+        this(instance, locale, name, null, description, false);
     }
 
     /**
@@ -317,7 +290,7 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
     public void execute(CommandSender sender, String[] args)
     {
 
-        if (this.isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
+        if (this.isPlayerOnlyCommandBool() && !(sender instanceof ProxiedPlayer)) {
             this.lib.debug(this, "Is player only command.");
             Sender.send(sender, this.PLAYER_ONLY_COMMAND);
             return;
@@ -386,59 +359,16 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
 
         LinkedList<String> newArgs = Lists.newLinkedList();
 
-        switch (this.state) {
-            case 2: {
-                this.lib.debug(this, "Running command bodies in full async mode.");
-                ListenableFuture<CommandResponse> fullFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
-                Futures.addCallback(fullFuture, new FutureCallback<CommandResponse>()
-                {
-                    @Override
-                    public void onSuccess(@Nullable CommandResponse response)
-                    {
-                        if (response.getType() == CommandResponse.Type.SUCCESS) {
-                            PucmanCommand.this.lib.debug(this, "The command was successfully executed.");
-                            PucmanCommand.this.onSuccess(response.getSender(), response.getData(), response.getArguments());
-                        } else {
-                            PucmanCommand.this.lib.debug(this, "The command did not execute successfully.");
-                            PucmanCommand.this.onFailure(response.getSender(), response.getData(), response.getArguments());
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable throwable)
-                    {
-                    }
-                });
-                return;
-            }
+        this.lib.debug(this, "Invoking main command body.");
+        CommandResponse noneResponse = this.execute(sender, newArgs);
 
-            case 1: {
-                this.lib.debug(this, "Running command bodies in semi async mode.");
-                ListenableFuture<CommandResponse> semiFuture = this.manager.getService().submit(() -> this.execute(sender, newArgs));
-                CommandResponse semiResponse = TryUtil.sneaky(semiFuture::get, CommandResponse.class);
-
-                if (semiResponse.getType() == CommandResponse.Type.SUCCESS) {
-                    this.lib.debug(this, "The command was successfully executed.");
-                    this.onSuccess(sender, semiResponse.getData(), newArgs);
-                } else {
-                    this.lib.debug(this, "The command did not execute successfully.");
-                    this.onFailure(sender, semiResponse.getData(), newArgs);
-                }
-                return;
-            }
-
-            case 0: {
-                this.lib.debug(this, "Not running command bodies in async mode of any capacity.");
-                CommandResponse noneResponse = this.execute(sender, newArgs);
-
-                if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
-                    this.lib.debug(this, "The command was successfully executed.");
-                    this.onSuccess(sender, noneResponse.getData(), newArgs);
-                } else {
-                    this.lib.debug(this, "The command did not execute successfully.");
-                    this.onFailure(sender, noneResponse.getData(), newArgs);
-                }
-            }
+        if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
+            this.lib.debug(this, "The command was successfully executed.");
+            this.onSuccess(sender, noneResponse.getData(), newArgs);
+        } else {
+            this.lib.debug(this, "The command did not execute successfully.");
+            this.onFailure(sender, noneResponse.getData(), newArgs);
         }
     }
 

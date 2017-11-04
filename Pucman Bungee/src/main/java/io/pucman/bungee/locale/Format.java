@@ -58,8 +58,17 @@ public final class Format
         int pageNumber = 1;
 
         for (TextComponent v : content) {
+            if (contentCount == 0) {
+                if (header != null && !pages.get(pageNumber).contains(header)) {
+                    pages.put(pageNumber, header);
+                }
+            }
+
             if (contentPerPage > content.size() && (contentCount + content.size()) <= contentPerPage) {
-                pages.putAll(pageNumber, GenericUtil.cast(content.toArray(new Object[content.size()])));
+                for (TextComponent c : content) {
+                    pages.put(pageNumber, c);
+                }
+
                 contentCount = contentPerPage;
             }
 
@@ -94,8 +103,17 @@ public final class Format
         int pageNumber = 1;
 
         for (String v : content) {
+            if (contentCount == 0) {
+                if (header != null && !pages.get(pageNumber).contains(header)) {
+                    pages.put(pageNumber, header);
+                }
+            }
+
             if (contentPerPage > content.size() && (contentCount + content.size()) <= contentPerPage) {
-                pages.putAll(pageNumber, GenericUtil.cast(content.toArray(new Object[content.size()])));
+                for (String c : content) {
+                    pages.put(pageNumber, c);
+                }
+
                 contentCount = contentPerPage;
             }
 
