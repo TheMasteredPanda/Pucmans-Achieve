@@ -80,11 +80,11 @@ public class BaseFile
      * @param instance - the instance of the class.
      */
     @SneakyThrows
-    public  <V extends Object> void populate(V instance)
+    public  <V> void populate(V instance)
     {
         Class clazz = instance.getClass();
         this.lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
-        for (Field f : clazz.getFields()) {
+        for (Field f : clazz.getDeclaredFields()) {
             this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {
                 this.lib.debug(this, f.getName() + " does not have the correct annotation.");
@@ -101,6 +101,8 @@ public class BaseFile
                 this.lib.debug(this, "Value is null in annotation over " + f.getName() + ".");
                 throw new DeveloperException("Key " + annotation.value() + ". Was not found in file " + this.getName() + ".");
             }
+
+            f.setAccessible(true);
 
             if (!GenericUtil.caseable(value, f.getType())) {
                 this.lib.debug(this, "Can't cast field type " + f.getName() + " do the value in the config.");

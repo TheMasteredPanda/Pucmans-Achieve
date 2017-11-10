@@ -7,6 +7,7 @@ import io.pucman.bungee.file.ConfigPopulate;
 import io.pucman.bungee.locale.Format;
 import io.pucman.bungee.locale.Locale;
 import io.pucman.bungee.sender.Sender;
+import io.pucman.common.generic.GenericUtil;
 import io.pucman.common.math.NumberUtil;
 import lombok.Getter;
 import lombok.NonNull;
@@ -33,12 +34,12 @@ import java.util.stream.Collectors;
  * as required argument fields, fields that are required in order for the command to run.
  *
  */
-public abstract class PucmanCommand<P extends Plugin> extends Command
+public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> extends Command
 {
     /**
      * Instance of the main library class.
      */
-    PLibrary lib = PLibrary.get();
+    private PLibrary lib = PLibrary.get();
 
     /**
      * Instance of the plugin passed in the constructors.
@@ -88,25 +89,25 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
      * The following fields are primarily locale.
      */
     @ConfigPopulate(value = "Plugin.Command.PlayerOnlyCommand", format = true)
-    public String PLAYER_ONLY_COMMAND;
+    private String PLAYER_ONLY_COMMAND;
 
     @ConfigPopulate(value = "Plugin.Command.NoPermission", format = true)
-    public String NO_PERMISSION;
+    private String NO_PERMISSION;
 
     @ConfigPopulate(value = "Plugin.Command.NotEnoughArguments", format = true)
-    public String NOT_ENOUGH_ARGUMENTS;
+    private String NOT_ENOUGH_ARGUMENTS;
 
     @ConfigPopulate(value = "Plugin.Command.IncorrectArgumentInput", format = true)
     public String INCORRECT_ARGUMENT_INPUT;
 
     @ConfigPopulate(value = "Plugin.Command.ParentCommandHeader", color = true)
-    public String PARENT_COMMAND_HEADER;
+    private String PARENT_COMMAND_HEADER;
 
     @ConfigPopulate(value = "Plugin.Command.ChildCommandHeader", color = true)
-    public String CHILD_COMMAND_HEADER;
+    private String CHILD_COMMAND_HEADER;
 
     @ConfigPopulate(value = "Plugin.Command.CommandEntry", color = true)
-    public String COMMAND_ENTRY;
+    private String COMMAND_ENTRY;
 
     /**
      * Instance of the command manager.
@@ -357,27 +358,27 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
             return;
         }
 
-        LinkedList<String> newArgs = Lists.newLinkedList();
+        LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
 
 
         this.lib.debug(this, "Invoking main command body.");
-        CommandResponse noneResponse = this.execute(sender, newArgs);
+        CommandResponse noneResponse = this.execute(GenericUtil.cast(sender), newArgs);
 
         if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
             this.lib.debug(this, "The command was successfully executed.");
-            this.onSuccess(sender, noneResponse.getData(), newArgs);
+            this.onSuccess(GenericUtil.cast(sender), noneResponse.getData(), newArgs);
         } else {
             this.lib.debug(this, "The command did not execute successfully.");
-            this.onFailure(sender, noneResponse.getData(), newArgs);
+            this.onFailure(GenericUtil.cast(sender), noneResponse.getData(), newArgs);
         }
     }
 
     /**
-     * Where the main body of the command will be defined.
+     * Main body of the command.
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public abstract CommandResponse execute(CommandSender sender, LinkedList<String> parameters);
+    public abstract CommandResponse execute(T sender, LinkedList<String> parameters);
 
     /**
      * If the commands body returns a failed command response, this part of the command
@@ -385,7 +386,7 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
      * @param sender - the seconder of the command
      * @param parameters - the parameters.
      */
-    public void onFailure(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters) {
+    public void onFailure(T sender, Map<String, Object> data, LinkedList<String> parameters) {
     }
 
     /**
@@ -394,6 +395,6 @@ public abstract class PucmanCommand<P extends Plugin> extends Command
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public void onSuccess(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters) {
+    public void onSuccess(T sender, Map<String, Object> data, LinkedList<String> parameters) {
     }
 }
