@@ -25,17 +25,18 @@ import java.util.stream.Collectors;
  * Wrapper for the bungee Command class. Handles most of the conditions for the benefit
  * that the developer will not have to write them for every parent and child command.
  *
- * @see this#execute(CommandSender, LinkedList)
- * @see this#onSuccess(CommandSender, Map, LinkedList)
- * @see this#onFailure(CommandSender, Map, LinkedList)
+ * @see this#execute(T1, LinkedList)
+ * @see this#onSuccess(T1, Map, LinkedList)
+ * @see this#onFailure(T1, Map, LinkedList)
  *
  * ArgumentField is a class that holds the name of the argument field and it's default value.
  * Argument fields that have their default value assigned to a non-null object will be treated
  * as required argument fields, fields that are required in order for the command to run.
  *
  */
-public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> extends Command
+public abstract class PucmanCommand<T extends Plugin, T1> extends Command
 {
+
     /**
      * Instance of the main library class.
      */
@@ -44,7 +45,7 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
     /**
      * Instance of the plugin passed in the constructors.
      */
-    protected P instance;
+    protected T instance;
 
     /**
      * Parent commands essentially does what it says on the tin. These are commands that consider
@@ -83,7 +84,7 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
      * If true, it is a player only command, otherwise both the console and player can execute it.
      */
     @Getter
-    private boolean playerOnlyCommandBool;
+    private boolean playerOnlyCommand;
 
     /**
      * The following fields are primarily locale.
@@ -109,6 +110,7 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
     @ConfigPopulate(value = "Plugin.Command.CommandEntry", color = true)
     private String COMMAND_ENTRY;
 
+
     /**
      * Instance of the command manager.
      *
@@ -127,9 +129,10 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
      * @param playerOnlyCommand - whether this is a command only executable via a player instance.
      * @param aliases - the aliases of this command.
      */
-    public PucmanCommand(@NonNull P instance, @NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, String... aliases)
+    public PucmanCommand(@NonNull T instance, @NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, String... aliases)
     {
         super(name, permission, aliases);
+
         this.instance = instance;
         locale.populate(this);
 
@@ -137,15 +140,15 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
             this.description = description;
         }
 
-        this.playerOnlyCommandBool = playerOnlyCommand;
+        this.playerOnlyCommand = playerOnlyCommand;
     }
 
-    public PucmanCommand(P instance, Locale locale, String name, String description, boolean playerOnlyCommand)
+    public PucmanCommand(T instance, Locale locale, String name, String description, boolean playerOnlyCommand)
     {
         this(instance, locale, name, null, description, playerOnlyCommand);
     }
 
-    public PucmanCommand(P instance, Locale locale, String name, String description)
+    public PucmanCommand(T instance, Locale locale, String name, String description)
     {
         this(instance, locale, name, null, description, false);
     }
@@ -291,7 +294,7 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
     public void execute(CommandSender sender, String[] args)
     {
 
-        if (this.isPlayerOnlyCommandBool() && !(sender instanceof ProxiedPlayer)) {
+        if (this.isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
             this.lib.debug(this, "Is player only command.");
             Sender.send(sender, this.PLAYER_ONLY_COMMAND);
             return;
@@ -360,7 +363,6 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
 
         LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
 
-
         this.lib.debug(this, "Invoking main command body.");
         CommandResponse noneResponse = this.execute(GenericUtil.cast(sender), newArgs);
 
@@ -378,7 +380,7 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public abstract CommandResponse execute(T sender, LinkedList<String> parameters);
+    public abstract CommandResponse execute(T1 sender, LinkedList<String> parameters);
 
     /**
      * If the commands body returns a failed command response, this part of the command
@@ -386,7 +388,7 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
      * @param sender - the seconder of the command
      * @param parameters - the parameters.
      */
-    public void onFailure(T sender, Map<String, Object> data, LinkedList<String> parameters) {
+    public void onFailure(T1 sender, Map<String, Object> data, LinkedList<String> parameters) {
     }
 
     /**
@@ -395,6 +397,6 @@ public abstract class PucmanCommand<P extends Plugin, T extends CommandSender> e
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public void onSuccess(T sender, Map<String, Object> data, LinkedList<String> parameters) {
+    public void onSuccess(T1 sender, Map<String, Object> data, LinkedList<String> parameters) {
     }
 }

@@ -27,14 +27,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <relocations>
-            <relocation>
-              <pattern>net.minecraft.server</pattern>
-              <shadedPattern>net.minecraft.server.${nms.version}</shadedPattern>
-            </relocation>
-          </relocations>
-        </configuration>
       </plugin>
     </plugins>
   </build>

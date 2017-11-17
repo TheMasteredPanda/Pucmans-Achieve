@@ -30,15 +30,6 @@
                         </goals>
                     </execution>
                 </executions>
-
-                <configuration>
-                    <relocations>
-                        <relocation>
-                            <pattern>com.google</pattern>
-                            <shadedPattern>io.pucman.depend.google</shadedPattern>
-                        </relocation>
-                    </relocations>
-                </configuration>
             </plugin>
         </plugins>
     </build>

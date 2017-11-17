@@ -19,19 +19,25 @@ public class MultiThreadedLibPlugin extends LibPlugin
         this.service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(max));
     }
 
-    public <V> ListenableFuture<V> execute(Callable<V> task)
+    /**
+     * Submit a callable.
+     * @param task - callable.
+     * @param <V> - generic type.
+     * @return listenable future.
+     */
+    public <V> ListenableFuture<V> submit(Callable<V> task)
     {
         return this.service.submit(task);
     }
 
-    public <V> ListenableFuture<V> execute(Runnable task, V type)
+    /**
+     * Submitting a runnable.
+     * @param task - the runnable.
+     * @return listenable future.
+     */
+    public void submit(Runnable task)
     {
-        return this.service.submit(task, type);
-    }
-
-    public ListenableFuture<?> execute(Runnable task)
-    {
-        return this.service.submit(task);
+        this.service.submit(task);
     }
 
     public void close()

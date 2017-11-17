@@ -32,7 +32,6 @@ public class CommandResponse
     {
         if (!this.data.containsKey(key)) {
             this.data.put(key, value);
-
         }
 
         return this;
