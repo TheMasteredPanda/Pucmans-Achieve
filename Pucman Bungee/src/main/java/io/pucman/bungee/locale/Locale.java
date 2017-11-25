@@ -112,14 +112,17 @@ public class Locale<P extends Plugin> extends BaseFile
     {
         Class clazz = instance.getClass();
         this.lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
+
         for (Field f : clazz.getFields()) {
             this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
+
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {
                 this.lib.debug(this, f.getName() + " does not have the correct annotation.");
                 continue;
             }
 
             this.lib.debug(this, f.getName() + " does have the correct annotation.");
+            f.setAccessible(true);
 
             ConfigPopulate annotation = f.getAnnotation(ConfigPopulate.class);
 

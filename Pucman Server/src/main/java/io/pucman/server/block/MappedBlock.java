@@ -11,6 +11,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @Getter
 public class MappedBlock
 {
-    private Action action;
+    private Action  action;
     private Class<? extends Event> event;
 }

@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
  */
 public abstract class PucmanCommand<T extends Plugin, T1> extends Command
 {
-
     /**
      * Instance of the main library class.
      */
@@ -251,6 +250,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public String getCommandPath()
     {
+        this.lib.debug(this, "Invoked getCommandPath()");
         StringBuilder sb = new StringBuilder("/");
 
         for (PucmanCommand parent : this.parentCommands) {
@@ -261,7 +261,8 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
             }
         }
 
-        return sb.toString();
+        this.lib.debug(this, "Returning unary value getCommandPath().");
+        return sb.append(this.getName()).toString();
     }
 
     /**
