@@ -10,7 +10,7 @@ import java.lang.reflect.Parameter;
 
 /**
  * Wrapper for reflected constructors.
- * @see ReflectUtil#get(Class, ReflectUtil.Type, Class[]).
+ * @see ReflectUtil#getConstructor(Class, ReflectUtil.Type, Class[]).
  * @param <T> - return type of the constructor.
  */
 public class ConstructorAccessor<T>
@@ -20,6 +20,7 @@ public class ConstructorAccessor<T>
     public ConstructorAccessor(Constructor<T> constructor)
     {
         this.constructor = constructor;
+        this.constructor.setAccessible(true);
     }
 
     /**

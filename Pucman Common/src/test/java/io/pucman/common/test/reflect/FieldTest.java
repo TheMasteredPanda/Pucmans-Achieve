@@ -1,33 +1,35 @@
 package io.pucman.common.test.reflect;
 
-import io.pucman.common.exception.TryUtil;
+import io.pucman.common.generic.GenericUtil;
 import io.pucman.common.reflect.ReflectUtil;
 import io.pucman.common.reflect.accessors.ConstructorAccessor;
 import io.pucman.common.reflect.accessors.FieldAccessor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import lombok.SneakyThrows;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class FieldTest
 {
-    @Test
+    @Test @SneakyThrows
     public void getField()
     {
-        FieldAccessor<String> fieldAccessor = TryUtil.sneaky(() -> ReflectUtil.wrap(ReflectClass.class.getField("s")), FieldAccessor.class);
-        Assertions.assertEquals(fieldAccessor, ReflectUtil.get(ReflectClass.class, "s", ReflectUtil.Type.DECLARED));
-        fieldAccessor = null;
+        FieldAccessor<String> fieldAccessor = GenericUtil.cast(ReflectUtil.wrapField(ReflectClass.class.getDeclaredField("text")));
+        Assert.assertEquals(fieldAccessor.getName(), ReflectUtil.getField(ReflectClass.class, "text", ReflectUtil.Type.DECLARED).getName());
     }
 
     @Test
     public void setField()
     {
-        ConstructorAccessor<ReflectClass> clazz = ReflectUtil.get(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class);
+        ConstructorAccessor<ReflectClass> clazz = ReflectUtil.getConstructor(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class);
         ReflectClass instance = clazz.call("hello");
-        FieldAccessor<String> fieldAccessor = ReflectUtil.get(ReflectClass.class, "s", ReflectUtil.Type.DECLARED);
-        Assertions.assertEquals("hello", instance.getText());
+
+        if (instance == null) {
+            Assert.fail("Instance is null.");
+        }
+
+        FieldAccessor<String> fieldAccessor = GenericUtil.cast(ReflectUtil.getField(ReflectClass.class, "text", ReflectUtil.Type.DECLARED));
+        Assert.assertEquals("hello", instance.getText());
         fieldAccessor.set(instance, "hi");
-        Assertions.assertEquals("hi", fieldAccessor.get(instance));
-        clazz = null;
-        instance = null;
-        fieldAccessor = null;
+        Assert.assertEquals("hi", fieldAccessor.get(instance));
     }
 }

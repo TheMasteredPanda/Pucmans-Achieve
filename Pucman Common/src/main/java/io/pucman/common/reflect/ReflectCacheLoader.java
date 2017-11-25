@@ -7,6 +7,7 @@ import io.pucman.common.reflect.accessors.FieldAccessor;
 import io.pucman.common.reflect.accessors.ConstructorAccessor;
 import io.pucman.common.reflect.accessors.MethodAccessor;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -16,12 +17,14 @@ import java.util.LinkedList;
  * @see ReflectUtil;
  * @param <T> - generic type.
  */
+@ParametersAreNonnullByDefault
 public class ReflectCacheLoader<T> extends CacheLoader<String, Object>
 {
 
     @Override
     public Object load(String key) throws Exception
     {
+        System.out.println("Key: " + key);
         String[] args = key.split(";");
 
         if (args[0].equals("M")) {
@@ -29,9 +32,11 @@ public class ReflectCacheLoader<T> extends CacheLoader<String, Object>
             Class<?> clazz = ReflectUtil.getClass(args[1]);
             LinkedList<Class<?>> parameters = Lists.newLinkedList();
 
-            for (String param : args[4].split("/")) {
-                if (!ReflectUtil.exists(param)) throw new DeveloperException("Parameter " + param + " does not exist.");
-                parameters.add(ReflectUtil.getClass(param));
+            if (parameters.size() == 5) {
+                for (String param : args[4].split("/")) {
+                    if (!ReflectUtil.exists(param)) throw new DeveloperException("Parameter " + param + " does not exist.");
+                    parameters.add(ReflectUtil.getClass(param));
+                }
             }
 
             Method method = args[3].equals("DECLARED") ? clazz.getDeclaredMethod(args[2], parameters.toArray(new Class[parameters.size()])) : clazz.getMethod(args[2], parameters.toArray(new Class[parameters.size()]));
@@ -56,10 +61,12 @@ public class ReflectCacheLoader<T> extends CacheLoader<String, Object>
                 parameters.add(ReflectUtil.getClass(param));
             }
 
-            Constructor constructor = args[2].equals("DECLARED") ? clazz.getDeclaredConstructor(parameters.toArray(new Class[parameters.size()])) : clazz.getConstructor(parameters.toArray(new Class[parameters.size()]));
+            Constructor constructor = args[2].equals("DECLARED") ?
+                    clazz.getDeclaredConstructor(parameters.toArray(new Class[parameters.size()])) :
+                    clazz.getConstructor(parameters.toArray(new Class[parameters.size()]));
             return new ConstructorAccessor<T>(constructor);
         }
-        if (ReflectUtil.exists(args[0])) return ReflectUtil.getClass(args[0]);
+
         throw new DeveloperException("Nothing was returned when parsing " + key + ".");
     }
 }

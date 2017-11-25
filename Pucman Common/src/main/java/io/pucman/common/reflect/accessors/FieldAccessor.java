@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 
 /**
  * Wrapper for reflected fields.
- * @see ReflectUtil#get(Class, String, ReflectUtil.Type).
+ * @see ReflectUtil#getField(Class, String, ReflectUtil.Type).
  * @param <T> - return type of the field.
  */
 public class FieldAccessor<T>

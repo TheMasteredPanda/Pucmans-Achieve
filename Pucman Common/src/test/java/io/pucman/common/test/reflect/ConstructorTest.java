@@ -1,28 +1,28 @@
 package io.pucman.common.test.reflect;
 
-import io.pucman.common.exception.TryUtil;
 import io.pucman.common.reflect.ReflectUtil;
 import io.pucman.common.reflect.accessors.ConstructorAccessor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import lombok.SneakyThrows;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ConstructorTest
 {
-    @Test
+    @Test @SneakyThrows
     public void getConstructor()
     {
-        ConstructorAccessor<ReflectClass> clazz = TryUtil.sneaky(() -> ReflectUtil.wrap(ReflectClass.class.getConstructor(String.class)), ConstructorAccessor.class);
-        Assertions.assertEquals(clazz, ReflectUtil.get(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class));
-        clazz = null;
+        ConstructorAccessor<ReflectClass> constructor = ReflectUtil.wrapConstructor(ReflectClass.class.getDeclaredConstructor(String.class));
+        Assert.assertEquals(constructor.get().getName(), ReflectUtil.getConstructor(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class).get().getName());
     }
 
     @Test
     public void createNewInstanceTest()
     {
-        ConstructorAccessor<ReflectClass> clazz = ReflectUtil.get(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class);
+        ConstructorAccessor<ReflectClass> clazz = ReflectUtil.getConstructor(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class);
         ReflectClass instance1 = clazz.call("hello");
-        Assertions.assertEquals("hello", instance1.getText());
-        clazz = null;
-        instance1 = null;
+        if (instance1 == null) {
+            Assert.fail("Instance is null.");
+        }
+        Assert.assertEquals("hello", instance1.getText());
     }
 }

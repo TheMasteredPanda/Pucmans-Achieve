@@ -5,7 +5,7 @@
     <parent>
         <artifactId>pucman-parent</artifactId>
         <groupId>io.pucman</groupId>
-        <version>1.0</version>
+        <version>1.2</version>
     </parent>
 
 
@@ -13,8 +13,6 @@
     <artifactId>pucman-common</artifactId>
 
     <build>
-        <testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -24,6 +22,17 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.4</version>
+
+                <configuration>
+                    <serverId>nexus</serverId>
+                    <nexusUrl>rrm.themasteredpanda.com</nexusUrl>
                 </configuration>
             </plugin>
         </plugins>

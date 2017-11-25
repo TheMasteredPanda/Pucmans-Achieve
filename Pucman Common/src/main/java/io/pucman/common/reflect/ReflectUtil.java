@@ -3,8 +3,8 @@ package io.pucman.common.reflect;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import io.pucman.common.exception.UtilException;
-import io.pucman.common.reflect.accessors.FieldAccessor;
 import io.pucman.common.reflect.accessors.ConstructorAccessor;
+import io.pucman.common.reflect.accessors.FieldAccessor;
 import io.pucman.common.reflect.accessors.MethodAccessor;
 import lombok.SneakyThrows;
 
@@ -12,6 +12,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 /**
  * For easy management of reflected objects.
@@ -24,7 +25,7 @@ public final class ReflectUtil
      * process of creating a new instance of the same object
      * when manipulating it.
      */
-    private static final LoadingCache<String, Object> REFLECT_CACHE = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(5, TimeUnit.MINUTES).build(new ReflectCacheLoader());
+    private static final LoadingCache<String, Object> REFLECT_CACHE = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(5, TimeUnit.MINUTES).build(new ReflectCacheLoader<>());
 
     public ReflectUtil()
     {
@@ -50,7 +51,7 @@ public final class ReflectUtil
     @SneakyThrows
     public static Class<?> getClass(String clazz)
     {
-        return (Class<?>) REFLECT_CACHE.get(clazz);
+        return Class.forName(clazz);
     }
 
     /**
@@ -73,20 +74,20 @@ public final class ReflectUtil
      * @return the wrapped method.
      */
     @SneakyThrows
-    public static MethodAccessor get(Class<?> clazz, String method, Type methodType, Class<?>... parameters)
+    public static <T> MethodAccessor<T> getMethod(Class<?> clazz, String method, Type methodType, Class<T> type, Class<?>... parameters)
     {
         StringBuilder sb = new StringBuilder("M;").append(clazz.getName()).append(";").append(method).append(";").append(methodType.name()).append(";");
 
-        for (int i = 0; i <= parameters.length; i++) {
-            sb.append(parameters[i].getClass().getName());
-
-            if (i + 1 != parameters.length) {
-                sb.append("/");
-            }
+        if (parameters.length != 0) {
+            IntStream.rangeClosed(0, parameters.length).forEachOrdered(i -> {
+                sb.append(parameters[i].getName());
+                if (i + 1 != parameters.length) {
+                    sb.append("/");
+                }
+            });
         }
 
-
-        return (MethodAccessor) REFLECT_CACHE.get(sb.toString());
+        return (MethodAccessor<T>) REFLECT_CACHE.get(sb.toString());
     }
 
     /**
@@ -98,7 +99,7 @@ public final class ReflectUtil
      * @return the wrapped field.
      */
     @SneakyThrows
-    public static FieldAccessor get(Class<?> clazz, String field, Type fieldType)
+    public static <T> FieldAccessor<T> getField(Class<T> clazz, String field, Type fieldType)
     {
         return (FieldAccessor) REFLECT_CACHE.get("F;" + clazz.getName() + ";" + field + ";" + fieldType.name());
     }
@@ -112,19 +113,22 @@ public final class ReflectUtil
      * @return
      */
     @SneakyThrows
-    public static ConstructorAccessor get(Class<?> clazz, Type constructorType, Class<?>... parameters)
+    public static <T> ConstructorAccessor<T> getConstructor(Class<T> clazz, Type constructorType, Class<?>... parameters)
     {
         StringBuilder sb = new StringBuilder("C;").append(clazz.getName()).append(";").append(constructorType.name()).append(";");
 
-        for (int i = 0; i <= parameters.length; i++) {
-            sb.append(parameters[i].getClass().getName());
+        int bound = parameters.length;
 
-            if (i + 1 != parameters.length) {
-                sb.append("/");
-            }
+        if (parameters.length != 0) {
+            IntStream.range(0, bound).forEachOrdered(i -> {
+                sb.append(parameters[i].getName());
+                if (i + 1 != parameters.length) {
+                    sb.append("/");
+                }
+            });
         }
 
-        return (ConstructorAccessor) REFLECT_CACHE.get(sb.toString());
+        return (ConstructorAccessor<T>) REFLECT_CACHE.get(sb.toString());
     }
 
 
@@ -134,7 +138,7 @@ public final class ReflectUtil
      * @return the wrapped method.
      */
     @SneakyThrows
-    public static MethodAccessor wrap(Method method)
+    public static MethodAccessor wrapMethod(Method method)
     {
         MethodAccessor accessor = new MethodAccessor(method);
         REFLECT_CACHE.put("F;" + method.getClass().getName() + ";" + method.getName() + ";" + (method.getDeclaringClass().getDeclaredMethod(method.getName(), method.getParameterTypes()) == null ? Type.PUBLIC : Type.DECLARED), accessor);
@@ -149,7 +153,7 @@ public final class ReflectUtil
      */
 
     @SneakyThrows
-    public static FieldAccessor wrap(Field field)
+    public static FieldAccessor wrapField(Field field)
     {
         FieldAccessor accessor = new FieldAccessor(field);
         REFLECT_CACHE.put("F;" + field.getClass().getName() + ";" + field.getName() + ";" + (field.getDeclaringClass().getDeclaredField(field.getName()) == null ? Type.PUBLIC : Type.DECLARED), accessor);
@@ -162,7 +166,7 @@ public final class ReflectUtil
      * @return the wrapped constructor.
      */
     @SneakyThrows
-    public static ConstructorAccessor wrap(Constructor constructor)
+    public static ConstructorAccessor wrapConstructor(Constructor constructor)
     {
         ConstructorAccessor accessor = new ConstructorAccessor(constructor);
         REFLECT_CACHE.put("F;" + constructor.getClass().getName() + ";" + constructor.getName() + ";" + (constructor.getDeclaringClass().getDeclaredConstructor(constructor.getParameterTypes()) == null ? Type.PUBLIC : Type.DECLARED), accessor);
