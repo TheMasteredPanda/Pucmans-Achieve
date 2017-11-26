@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
  * as required argument fields, fields that are required in order for the command to run.
  *
  */
+//TODO asynchronously.
 public abstract class PucmanCommand<T extends Plugin, T1> extends Command
 {
     /**

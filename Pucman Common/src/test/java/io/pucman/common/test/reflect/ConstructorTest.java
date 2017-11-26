@@ -20,9 +20,6 @@ public class ConstructorTest
     {
         ConstructorAccessor<ReflectClass> clazz = ReflectUtil.getConstructor(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class);
         ReflectClass instance1 = clazz.call("hello");
-        if (instance1 == null) {
-            Assert.fail("Instance is null.");
-        }
         Assert.assertEquals("hello", instance1.getText());
     }
 }

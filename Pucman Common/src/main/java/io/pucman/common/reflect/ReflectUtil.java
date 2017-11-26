@@ -74,13 +74,14 @@ public final class ReflectUtil
      * @return the wrapped method.
      */
     @SneakyThrows
-    public static <T> MethodAccessor<T> getMethod(Class<?> clazz, String method, Type methodType, Class<T> type, Class<?>... parameters)
+    public static <T> MethodAccessor<T> getMethod(Class<?> clazz, String method, Type methodType, Class<?>... parameters)
     {
         StringBuilder sb = new StringBuilder("M;").append(clazz.getName()).append(";").append(method).append(";").append(methodType.name()).append(";");
 
         if (parameters.length != 0) {
-            IntStream.rangeClosed(0, parameters.length).forEachOrdered(i -> {
+            IntStream.range(0, parameters.length).forEachOrdered(i -> {
                 sb.append(parameters[i].getName());
+
                 if (i + 1 != parameters.length) {
                     sb.append("/");
                 }
@@ -99,7 +100,7 @@ public final class ReflectUtil
      * @return the wrapped field.
      */
     @SneakyThrows
-    public static <T> FieldAccessor<T> getField(Class<T> clazz, String field, Type fieldType)
+    public static <T> FieldAccessor<T> getField(Class clazz, String field, Type fieldType)
     {
         return (FieldAccessor) REFLECT_CACHE.get("F;" + clazz.getName() + ";" + field + ";" + fieldType.name());
     }

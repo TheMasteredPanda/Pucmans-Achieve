@@ -27,7 +27,7 @@ public class FieldTest
             Assert.fail("Instance is null.");
         }
 
-        FieldAccessor<String> fieldAccessor = GenericUtil.cast(ReflectUtil.getField(ReflectClass.class, "text", ReflectUtil.Type.DECLARED));
+        FieldAccessor<String> fieldAccessor = ReflectUtil.getField(ReflectClass.class, "text", ReflectUtil.Type.DECLARED);
         Assert.assertEquals("hello", instance.getText());
         fieldAccessor.set(instance, "hi");
         Assert.assertEquals("hi", fieldAccessor.get(instance));

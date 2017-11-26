@@ -21,9 +21,6 @@ public class MethodTest
     {
         ConstructorAccessor<ReflectClass> constructorAccessor = ReflectUtil.getConstructor(ReflectClass.class, ReflectUtil.Type.DECLARED, String.class);
         ReflectClass clazz = constructorAccessor.call("hello");
-        if (clazz == null) {
-            Assert.fail("Instance is null.");
-        }
         MethodAccessor<String> accessor = ReflectUtil.getMethod(ReflectClass.class, "getText", ReflectUtil.Type.DECLARED, String.class);
         Assert.assertEquals("hello", accessor.call(clazz));
     }

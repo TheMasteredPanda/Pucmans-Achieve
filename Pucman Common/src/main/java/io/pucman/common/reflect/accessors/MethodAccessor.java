@@ -10,7 +10,7 @@ import java.lang.reflect.Parameter;
 
 /**
  * Wrapper for handling reflected methods.
- * @see ReflectUtil#getMethod(Class, String, ReflectUtil.Type, Class, Class[]).
+ * @see ReflectUtil#getMethod(Class, String, ReflectUtil.Type, Class[]).
  * @param <T> - return type of the method.
  */
 public class MethodAccessor<T>

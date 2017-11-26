@@ -14,6 +14,7 @@ public class Manager<P extends Plugin>
 {
     protected P instance;
     private AtomicBoolean enable = new AtomicBoolean(false);
+
     @Getter
     private Priority priority;
 
