@@ -1,11 +1,13 @@
 package io.pucman.bungee.locale;
 
 import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Maps;
 import io.pucman.common.exception.UtilException;
 import io.pucman.common.generic.GenericUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -96,22 +98,23 @@ public final class Format
      * Same as above, but with strings.
      * @return a linked list multimap with the structure of <pageNumber, LinkedList<String>>
      */
-    public static LinkedListMultimap<Integer, String> paginateString(List<String> content, String header, String footer, int contentPerPage)
+    public static LinkedHashMap<Integer, String> paginate(List<String> content, String header, String footer, int contentPerPage)
     {
-        LinkedListMultimap<Integer, String> pages = LinkedListMultimap.create();
+        LinkedHashMap<Integer, String> pages = Maps.newLinkedHashMap();
+        StringBuilder sb = new StringBuilder();
         int contentCount = 0;
         int pageNumber = 1;
 
         for (String v : content) {
             if (contentCount == 0) {
-                if (header != null && !pages.get(pageNumber).contains(header)) {
-                    pages.put(pageNumber, header);
+                if (header != null && !sb.toString().contains(header)) {
+                    sb.append(header).append("\n");
                 }
             }
 
             if (contentPerPage > content.size() && (contentCount + content.size()) <= contentPerPage) {
                 for (String c : content) {
-                    pages.put(pageNumber, c);
+                    sb.append(c).append("\n");
                 }
 
                 contentCount = contentPerPage;
@@ -119,18 +122,19 @@ public final class Format
 
             if (contentCount == contentPerPage) {
                 if (footer != null) {
-                    pages.put(pageNumber, footer);
+                    sb.append(footer).append("\n");
                 }
 
                 pageNumber++;
                 contentCount = 0;
+                sb = new StringBuilder();
 
                 if (header != null) {
-                    pages.put(pageNumber, header);
+                    sb.append(header).append("\n");
                 }
             }
 
-            pages.put(pageNumber, v);
+            sb.append(v).append("\n");
             content.remove(v);
         }
 

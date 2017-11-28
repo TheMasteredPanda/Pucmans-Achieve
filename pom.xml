@@ -12,11 +12,7 @@
     <repositories>
         <repository>
             <id>nexus-personal</id>
-            <url>http://rrm.themasteredpanda.com/repository/releases/</url>
-        </repository>
-        <repository>
-            <id>nexus-personal</id>
-            <url>http://rrm.themasteredpanda.com/repository/central/</url>
+            <url>${env.MVN_RRM_URL}/releases/</url>
         </repository>
     </repositories>
 
@@ -30,13 +26,13 @@
         <repository>
             <id>nexus-personal</id>
             <name>nexus-personal-releases</name>
-            <url>http://rrm.themasteredpanda.com/repository/releases/</url>
+            <url>${env.MVN_RRM_URL}/releases/</url>
         </repository>
 
         <snapshotRepository>
             <id>nexus-personal</id>
             <name>nexus-personal-snapshots</name>
-            <url>http://rrm.themasteredpanda.com/repository/snapshots/</url>
+            <url>${env.MVN_RRM_URL}/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 

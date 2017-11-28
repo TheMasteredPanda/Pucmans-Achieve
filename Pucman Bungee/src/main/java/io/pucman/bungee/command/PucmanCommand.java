@@ -1,6 +1,5 @@
 package io.pucman.bungee.command;
 
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.file.ConfigPopulate;
@@ -17,6 +16,7 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -325,7 +325,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
                 }
 
                 this.lib.debug(this, "Paginating.");
-                LinkedListMultimap<Integer, String> pages = Format.paginateString(content, null, null, 5);
+                LinkedHashMap<Integer, String> pages = Format.paginate(content, null, null, 5);
 
                 if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
                     this.lib.debug(this, "2 argument was found and parsable as an integer.");
