@@ -15,8 +15,8 @@ import java.util.Map;
  */
 public class JsonProvider extends ConfigurationProvider
 {
-    private final ConstructorAccessor<Configuration> MAP_CONFIURATION_CONSTRUCTOR = ReflectUtil.get(Configuration.class, ReflectUtil.Type.DECLARED, Map.class, Configuration.class);
-    private final FieldAccessor<Map<String, Object>> CONFIGURATION_SELF_FIELD = ReflectUtil.get(Configuration.class, "self", ReflectUtil.Type.DECLARED);
+    private final ConstructorAccessor<Configuration> MAP_CONFIURATION_CONSTRUCTOR = ReflectUtil.getConstructor(Configuration.class, ReflectUtil.Type.DECLARED, Map.class, Configuration.class);
+    private final FieldAccessor<Map<String, Object>> CONFIGURATION_SELF_FIELD = ReflectUtil.getField(Configuration.class, "self", ReflectUtil.Type.DECLARED);
     private final Gson gson = new Gson();
 
     @Override
