@@ -7,6 +7,7 @@ import io.pucman.common.generic.GenericUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -59,7 +60,8 @@ public final class Format
         int contentCount = 0;
         int pageNumber = 1;
 
-        for (TextComponent v : content) {
+        for (Iterator<TextComponent> iterator = content.iterator(); iterator.hasNext(); ) {
+            TextComponent v = iterator.next();
             if (contentCount == 0) {
                 if (header != null && !pages.get(pageNumber).contains(header)) {
                     pages.put(pageNumber, header);
@@ -88,7 +90,7 @@ public final class Format
             }
 
             pages.put(pageNumber, v);
-            content.remove(v);
+            iterator.remove();
         }
 
         return GenericUtil.cast(pages);
@@ -105,7 +107,8 @@ public final class Format
         int contentCount = 0;
         int pageNumber = 1;
 
-        for (String v : content) {
+        for (Iterator<String> iterator = content.iterator(); iterator.hasNext(); ) {
+            String v = iterator.next();
             if (contentCount == 0) {
                 if (header != null && !sb.toString().contains(header)) {
                     sb.append(header).append("\n");
@@ -122,9 +125,10 @@ public final class Format
 
             if (contentCount == contentPerPage) {
                 if (footer != null) {
-                    sb.append(footer).append("\n");
+                    sb.append(footer);
                 }
 
+                pages.put(pageNumber, sb.toString());
                 pageNumber++;
                 contentCount = 0;
                 sb = new StringBuilder();
@@ -135,7 +139,7 @@ public final class Format
             }
 
             sb.append(v).append("\n");
-            content.remove(v);
+            iterator.remove();
         }
 
         return pages;
