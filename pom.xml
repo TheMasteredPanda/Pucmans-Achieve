@@ -14,6 +14,10 @@
             <id>central</id>
             <url>${env.MAVEN_RRM_URL}/central/</url>
         </repository>
+        <repository>
+            <id>releases</id>
+            <url>${env.MAVEN_RRM_URL}/releases/</url>
+        </repository>
     </repositories>
 
     <modules>
@@ -24,14 +28,14 @@
 
     <distributionManagement>
         <repository>
-            <id>nexus-personal</id>
-            <name>nexus-personal-releases</name>
+            <id>releases</id>
+            <name>releases</name>
             <url>${env.MAVEN_RRM_URL}/releases/</url>
         </repository>
 
         <snapshotRepository>
-            <id>nexus-personal</id>
-            <name>nexus-personal-snapshots</name>
+            <id>snapshots</id>
+            <name>snapshots</name>
             <url>${env.MAVEN_RRM_URL}/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
