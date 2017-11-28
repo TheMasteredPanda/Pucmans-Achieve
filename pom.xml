@@ -12,7 +12,7 @@
     <repositories>
         <repository>
             <id>nexus-personal</id>
-            <url>${env.MVN_RRM_URL}/releases/</url>
+            <url>${env.MAVEN_RRM_URL}/releases/</url>
         </repository>
     </repositories>
 
@@ -26,13 +26,13 @@
         <repository>
             <id>nexus-personal</id>
             <name>nexus-personal-releases</name>
-            <url>${env.MVN_RRM_URL}/releases/</url>
+            <url>${env.MAVEN_RRM_URL}/releases/</url>
         </repository>
 
         <snapshotRepository>
             <id>nexus-personal</id>
             <name>nexus-personal-snapshots</name>
-            <url>${env.MVN_RRM_URL}/snapshots/</url>
+            <url>${env.MAVEN_RRM_URL}/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
