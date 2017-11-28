@@ -68,12 +68,12 @@
             <version>${server.version}</version>
         </dependency>
 
-        <dependency>
+      <!--  <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>minecraft-server</artifactId>
             <version>${minecraft.version}</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency> -->
 
         <dependency>
             <groupId>org.bukkit</groupId>
