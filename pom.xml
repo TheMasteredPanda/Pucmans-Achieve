@@ -14,6 +14,10 @@
             <id>nexus-personal</id>
             <url>${env.MAVEN_RRM_URL}/releases/</url>
         </repository>
+        <repository>
+            <id>nexus-personal</id>
+            <url>${env.MAVEN_RRM_URL}/central/</url>
+        </repository>
     </repositories>
 
     <modules>
