@@ -12,7 +12,7 @@ cache:
 build:
   stage: build
   script:
-    - "mvn $MAVEN_CLI_OPS compile"
+    - "mvn $MAVEN_CLI_OPS package"
 
 test:
   stage: test
