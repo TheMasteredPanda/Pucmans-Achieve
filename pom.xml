@@ -11,8 +11,8 @@
 
     <repositories>
         <repository>
-            <id>releases</id>
-            <url>${env.MAVEN_RRM_URL}/releases/</url>
+            <id>central</id>
+            <url>${env.MAVEN_RRM_URL}/central/</url>
         </repository>
     </repositories>
 
