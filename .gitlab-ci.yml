@@ -12,10 +12,10 @@ cache:
 build:
   stage: build
   script:
-    - mvn $MAVEN_CLI_OPTS compile
+    - mvn $MAVEN_CLI_OPTS package
   artifacts:
     paths:
-      - "Pucman Parent/target/*.jar"
+      - "target/*.jar"
       - "Pucman Server/target/*.jar"
       - "Pucman Bungee/target/*.jar"
 
