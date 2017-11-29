@@ -3,6 +3,7 @@ package io.pucman.server.gui.page;
 import com.google.common.collect.Lists;
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.server.gui.GUIPlayer;
+import io.pucman.server.locale.Format;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
