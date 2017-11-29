@@ -1,4 +1,4 @@
-package io.pucman.bungee.locale;
+package io.pucman.server.locale;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;

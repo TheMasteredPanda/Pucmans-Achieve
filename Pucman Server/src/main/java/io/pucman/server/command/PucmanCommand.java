@@ -10,7 +10,6 @@ import io.pucman.common.exception.TryUtil;
 import io.pucman.common.math.NumberUtil;
 import io.pucman.server.PLibrary;
 import io.pucman.server.file.ConfigPopulate;
-import io.pucman.server.locale.Format;
 import io.pucman.server.locale.Locale;
 import io.pucman.server.sender.Sender;
 import lombok.Getter;
