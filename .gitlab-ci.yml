@@ -13,6 +13,10 @@ build:
   stage: build
   script:
     - mvn $MAVEN_CLI_OPTS compile
+  paths:
+    - "target/*.jar"
+    - "Pucman Server/target/*.jar"
+    - "Pucman Bungee/target/*.jar"
 
 test:
   stage: test
