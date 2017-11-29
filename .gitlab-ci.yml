@@ -15,7 +15,7 @@ build:
     - mvn $MAVEN_CLI_OPTS compile
   artifacts:
     paths:
-      - "target/*.jar"
+      - "Pucman Parent/target/*.jar"
       - "Pucman Server/target/*.jar"
       - "Pucman Bungee/target/*.jar"
 
