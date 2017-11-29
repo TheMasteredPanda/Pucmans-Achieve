@@ -18,7 +18,6 @@ import net.md_5.bungee.api.plugin.Plugin;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -26,8 +25,6 @@ import java.util.stream.Collectors;
  * that the developer will not have to write them for every parent and child command.
  *
  * @see this#execute(T1, LinkedList)
- * @see this#onSuccess(T1, Map, LinkedList)
- * @see this#onFailure(T1, Map, LinkedList)
  *
  * ArgumentField is a class that holds the name of the argument field and it's default value.
  * Argument fields that have their default value assigned to a non-null object will be treated
@@ -366,15 +363,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
         LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
 
         this.lib.debug(this, "Invoking main command body.");
-        CommandResponse noneResponse = this.execute(GenericUtil.cast(sender), newArgs);
-
-        if (noneResponse.getType() == CommandResponse.Type.SUCCESS) {
-            this.lib.debug(this, "The command was successfully executed.");
-            this.onSuccess(GenericUtil.cast(sender), noneResponse.getData(), newArgs);
-        } else {
-            this.lib.debug(this, "The command did not execute successfully.");
-            this.onFailure(GenericUtil.cast(sender), noneResponse.getData(), newArgs);
-        }
+        this.execute(GenericUtil.cast(sender), newArgs);
     }
 
     /**
@@ -382,23 +371,5 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public abstract CommandResponse execute(T1 sender, LinkedList<String> parameters);
-
-    /**
-     * If the commands body returns a failed command response, this part of the command
-     * body will be invoked.
-     * @param sender - the seconder of the command
-     * @param parameters - the parameters.
-     */
-    public void onFailure(T1 sender, Map<String, Object> data, LinkedList<String> parameters) {
-    }
-
-    /**
-     * If the commands body returns a successful command response, this part of the command
-     * body will be invoked.
-     * @param sender - the sender of the command.
-     * @param parameters - the parameters.
-     */
-    public void onSuccess(T1 sender, Map<String, Object> data, LinkedList<String> parameters) {
-    }
+    public abstract void execute(T1 sender, LinkedList<String> parameters);
 }
