@@ -1,6 +1,5 @@
 package io.pucman.server.command;
 
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -10,6 +9,7 @@ import io.pucman.common.exception.TryUtil;
 import io.pucman.common.math.NumberUtil;
 import io.pucman.server.PLibrary;
 import io.pucman.server.file.ConfigPopulate;
+import io.pucman.server.locale.Format;
 import io.pucman.server.locale.Locale;
 import io.pucman.server.sender.Sender;
 import lombok.Getter;
@@ -22,6 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -353,7 +354,7 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
                     }
                 }
 
-                LinkedListMultimap<Integer, String> pages = Format.paginate(String.class, content, null, null, 5);
+                LinkedHashMap<Integer, String> pages = Format.paginate(content, null, null, 5);
 
                 if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
                     Sender.send(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
