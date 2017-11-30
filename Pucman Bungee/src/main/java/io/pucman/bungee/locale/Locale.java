@@ -113,7 +113,7 @@ public class Locale<P extends Plugin> extends BaseFile
         Class clazz = instance.getClass();
         this.lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
 
-        for (Field f : clazz.getFields()) {
+        for (Field f : clazz.getDeclaredFields()) {
             this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
 
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {
