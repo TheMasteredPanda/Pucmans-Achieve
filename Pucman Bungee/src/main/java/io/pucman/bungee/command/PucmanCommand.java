@@ -87,25 +87,25 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      * The following fields are primarily locale.
      */
     @ConfigPopulate(value = "Plugin.Command.PlayerOnlyCommand", format = true)
-    private String PLAYER_ONLY_COMMAND;
+    protected String PLAYER_ONLY_COMMAND;
 
     @ConfigPopulate(value = "Plugin.Command.NoPermission", format = true)
-    private String NO_PERMISSION;
+    protected String NO_PERMISSION;
 
     @ConfigPopulate(value = "Plugin.Command.NotEnoughArguments", format = true)
-    private String NOT_ENOUGH_ARGUMENTS;
+    protected String NOT_ENOUGH_ARGUMENTS;
 
     @ConfigPopulate(value = "Plugin.Command.IncorrectArgumentInput", format = true)
-    public String INCORRECT_ARGUMENT_INPUT;
+    protected String INCORRECT_ARGUMENT_INPUT;
 
     @ConfigPopulate(value = "Plugin.Command.ParentCommandHeader", color = true)
-    private String PARENT_COMMAND_HEADER;
+    protected String PARENT_COMMAND_HEADER;
 
     @ConfigPopulate(value = "Plugin.Command.ChildCommandHeader", color = true)
-    private String CHILD_COMMAND_HEADER;
+    protected String CHILD_COMMAND_HEADER;
 
     @ConfigPopulate(value = "Plugin.Command.CommandEntry", color = true)
-    private String COMMAND_ENTRY;
+    protected String COMMAND_ENTRY;
 
 
     /**
@@ -131,7 +131,9 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
         super(name, permission, aliases);
 
         this.instance = instance;
+        LIB.debug(this, "Populating mandatory messages.");
         locale.populate(this);
+        LIB.debug(this, "Populated mandatory messages.");
 
         if (description != null) {
             this.description = description;
