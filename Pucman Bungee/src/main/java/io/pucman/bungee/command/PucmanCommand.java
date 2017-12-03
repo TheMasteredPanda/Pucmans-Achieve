@@ -37,7 +37,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     /**
      * Instance of the main library class.
      */
-    private PLibrary lib = PLibrary.get();
+    private final PLibrary LIB = PLibrary.get();
 
     /**
      * Instance of the plugin passed in the constructors.
@@ -130,14 +130,14 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     {
         super(name, permission, aliases);
 
-        this.instance = instance;
+        instance = instance;
         locale.populate(this);
 
         if (description != null) {
-            this.description = description;
+            description = description;
         }
 
-        this.playerOnlyCommand = playerOnlyCommand;
+        playerOnlyCommand = playerOnlyCommand;
     }
 
     public PucmanCommand(T instance, Locale locale, String name, String description, boolean playerOnlyCommand)
@@ -156,8 +156,8 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public void arguments(ArgumentField... fields)
     {
-        this.argumentFields.addAll(Arrays.asList(fields));
-        this.requiredArgumentFields = this.argumentFields.stream().filter(field -> field.getDef() != null).collect(Collectors.toCollection(Lists::newLinkedList));
+        argumentFields.addAll(Arrays.asList(fields));
+        requiredArgumentFields = argumentFields.stream().filter(field -> field.getDef() != null).collect(Collectors.toCollection(Lists::newLinkedList));
     }
 
     /**
@@ -167,8 +167,8 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     public void addParentCommands(PucmanCommand... commands)
     {
         for (PucmanCommand command : commands) {
-            if (!this.isParentCommand(command) && !this.isChildCommand(command) && command != null) {
-                this.parentCommands.add(command);
+            if (!isParentCommand(command) && !isChildCommand(command) && command != null) {
+                parentCommands.add(command);
                 command.addChildCommands(this);
             }
         }
@@ -181,7 +181,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public boolean isParentCommand(PucmanCommand command)
     {
-        return this.parentCommands.contains(command);
+        return parentCommands.contains(command);
     }
 
     /**
@@ -191,8 +191,8 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     public void addChildCommands(PucmanCommand... commands)
     {
         for (PucmanCommand command : commands) {
-            if (!this.isParentCommand(command) && !this.isChildCommand(command) && command != null) {
-                this.childCommands.add(command);
+            if (!isParentCommand(command) && !isChildCommand(command) && command != null) {
+                childCommands.add(command);
                 command.addParentCommands(this);
             }
         }
@@ -205,7 +205,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public boolean isChildCommand(PucmanCommand command)
     {
-        return this.childCommands.contains(command);
+        return childCommands.contains(command);
     }
 
     /**
@@ -215,7 +215,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public boolean isAlias(String alias)
     {
-        return Arrays.asList(this.getAliases()).contains(alias) || alias.equals(this.getName());
+        return Arrays.asList(getAliases()).contains(alias) || alias.equals(getName());
     }
 
     /**
@@ -225,7 +225,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public boolean hasPermission(CommandSender sender)
     {
-        return this.getPermission() != null || sender.hasPermission(this.getPermission());
+        return getPermission() != null || sender.hasPermission(getPermission());
     }
 
     /**
@@ -237,7 +237,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public boolean isRequiredArgumentField(ArgumentField field)
     {
-        return this.requiredArgumentFields.contains(field);
+        return requiredArgumentFields.contains(field);
     }
 
     /**
@@ -248,19 +248,19 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public String getCommandPath()
     {
-        this.lib.debug(this, "Invoked getCommandPath()");
+        LIB.debug(this, "Invoked getCommandPath()");
         StringBuilder sb = new StringBuilder("/");
 
-        for (PucmanCommand parent : this.parentCommands) {
+        for (PucmanCommand parent : parentCommands) {
             sb.append(parent.getName());
 
-            if (parent != this.parentCommands.getLast()) {
+            if (parent != parentCommands.getLast()) {
                 sb.append(" ");
             }
         }
 
-        this.lib.debug(this, "Returning unary value getCommandPath().");
-        return sb.append(this.getName()).toString();
+        LIB.debug(this, "Returning unary value getCommandPath().");
+        return sb.append(getName()).toString();
     }
 
     /**
@@ -271,12 +271,12 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      */
     public String getCommandUsage()
     {
-        StringBuilder sb = new StringBuilder(this.getCommandPath()).append(" ");
+        StringBuilder sb = new StringBuilder(getCommandPath()).append(" ");
 
-        for (ArgumentField field : this.argumentFields) {
-            sb.append(this.isRequiredArgumentField(field) ? "<" : "[").append(field.getName()).append(this.isRequiredArgumentField(field) ? ">" : "]");
+        for (ArgumentField field : argumentFields) {
+            sb.append(isRequiredArgumentField(field) ? "<" : "[").append(field.getName()).append(isRequiredArgumentField(field) ? ">" : "]");
 
-            if (field != this.argumentFields.getLast()) {
+            if (field != argumentFields.getLast()) {
                 sb.append(" ");
             }
         }
@@ -293,77 +293,84 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     public void execute(CommandSender sender, String[] args)
     {
 
-        if (this.isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
-            this.lib.debug(this, "Is player only command.");
-            Sender.send(sender, this.PLAYER_ONLY_COMMAND);
+        if (isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
+            LIB.debug(this, "Is player only command.");
+            Sender.send(sender, PLAYER_ONLY_COMMAND);
             return;
         }
 
-        if (!this.hasPermission(sender)) {
-            this.lib.debug(this, "No permission.");
-            Sender.send(sender, this.NO_PERMISSION);
+        if (!hasPermission(sender)) {
+            LIB.debug(this, "No permission.");
+            Sender.send(sender, NO_PERMISSION);
             return;
         }
 
         if (args.length >= 1) {
-            this.lib.debug(this, "Argument length is bigger or equal than 1.");
+            LIB.debug(this, "Argument length is bigger or equal than 1.");
             if (args[0].equalsIgnoreCase("help")) {
-                this.lib.debug(this, "First argument is 'help'");
+                LIB.debug(this, "First argument is 'help'");
                 LinkedList<String> content = Lists.newLinkedList();
-                content.add(this.PARENT_COMMAND_HEADER.replace("{commandusage}", this.getCommandUsage()).replace("{commanddescrption}", this.getDescription()));
+                
+                if (PARENT_COMMAND_HEADER == null) {
+                    LIB.debug(this, "PARENT_COMMAND_HEADER is null.");
+                }
+                
+                content.add(PARENT_COMMAND_HEADER.replace("{commandusage}",
+                        getCommandUsage()).replace("{commanddescrption}",
+                        getDescription()));
 
-                if (this.childCommands.size() > 0) {
-                    this.lib.debug(this, "Invoked command has child commands.");
-                    content.add(this.CHILD_COMMAND_HEADER);
+                if (childCommands.size() > 0) {
+                    LIB.debug(this, "Invoked command has child commands.");
+                    content.add(CHILD_COMMAND_HEADER);
 
-                    for (PucmanCommand child : this.childCommands) {
-                        content.add(this.COMMAND_ENTRY.replace("{commandusage}", child.getCommandPath()).replace("{commanddescription}", child.getDescription()));
+                    for (PucmanCommand child : childCommands) {
+                        content.add(COMMAND_ENTRY.replace("{commandusage}", child.getCommandPath()).replace("{commanddescription}", child.getDescription()));
                     }
                 }
 
-                this.lib.debug(this, "Paginating.");
+                LIB.debug(this, "Paginating.");
                 LinkedHashMap<Integer, String> pages = Format.paginate(content, null, null, 5);
 
                 if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
-                    this.lib.debug(this, "2 argument was found and parsable as an integer.");
+                    LIB.debug(this, "2 argument was found and parsable as an integer.");
                     Sender.send(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
                 } else {
-                    this.lib.debug("No second argument found, printing first page.");
+                    LIB.debug("No second argument found, printing first page.");
                     Sender.send(sender, pages.get(1));
                 }
                 return;
             }
 
-            this.lib.debug(this, "Checking if the second argument is a child command.");
-            if (this.childCommands.size() > 0) {
-                for (PucmanCommand child : this.childCommands) {
+            LIB.debug(this, "Checking if the second argument is a child command.");
+            if (childCommands.size() > 0) {
+                for (PucmanCommand child : childCommands) {
                     if (!child.isAlias(args[0])) {
-                        this.lib.debug(this, child.getName() + " is not the second argument.");
+                        LIB.debug(this, child.getName() + " is not the second argument.");
                         continue;
                     }
 
-                    this.lib.debug(this, child.getName() + " is the second argument.");
+                    LIB.debug(this, child.getName() + " is the second argument.");
                     LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
                     newArgs.remove(args[0]);
-                    this.lib.debug(this, "Invoking constructor of command " + child.getName() + ".");
+                    LIB.debug(this, "Invoking constructor of command " + child.getName() + ".");
                     child.execute(sender, newArgs.toArray(new String[newArgs.size()]));
                     return;
                 }
             }
         } else {
-            this.lib.debug(this, "There are no arguments.");
+            LIB.debug(this, "There are no arguments.");
         }
 
-        if (args.length < this.getRequiredArgumentFields().size()) {
-            this.lib.debug("Required arguments not found.");
-            Sender.send(sender, this.NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", this.getCommandUsage()));
+        if (args.length < getRequiredArgumentFields().size()) {
+            LIB.debug("Required arguments not found.");
+            Sender.send(sender, NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", getCommandUsage()));
             return;
         }
 
         LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
 
-        this.lib.debug(this, "Invoking main command body.");
-        this.execute(GenericUtil.cast(sender), newArgs);
+        LIB.debug(this, "Invoking main command body.");
+        execute(GenericUtil.cast(sender), newArgs);
     }
 
     /**
