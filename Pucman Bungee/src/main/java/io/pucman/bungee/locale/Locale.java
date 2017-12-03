@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The concept behind this class is for easy management of the locale
@@ -113,7 +114,11 @@ public class Locale<P extends Plugin> extends BaseFile
         Class clazz = instance.getClass();
         this.lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
 
-        for (Field f : clazz.getDeclaredFields()) {
+
+        List<Field> fieldList = Lists.newArrayList(clazz.getDeclaredFields());
+        fieldList.addAll(Arrays.asList(clazz.getFields()));
+
+        for (Field f : fieldList) {
             this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
 
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {
