@@ -118,6 +118,8 @@ public class Locale<P extends Plugin> extends BaseFile
         List<Field> fieldList = Lists.newArrayList(clazz.getDeclaredFields());
         fieldList.addAll(Arrays.asList(clazz.getFields()));
 
+        lib.debug(this, "List of fields in " + clazz.getName() + ": " + fieldList);
+
         for (Field f : fieldList) {
             this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
 
