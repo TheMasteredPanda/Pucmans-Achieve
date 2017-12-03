@@ -130,14 +130,14 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     {
         super(name, permission, aliases);
 
-        instance = instance;
+        this.instance = instance;
         locale.populate(this);
 
         if (description != null) {
-            description = description;
+            this.description = description;
         }
 
-        playerOnlyCommand = playerOnlyCommand;
+        this.playerOnlyCommand = playerOnlyCommand;
     }
 
     public PucmanCommand(T instance, Locale locale, String name, String description, boolean playerOnlyCommand)
