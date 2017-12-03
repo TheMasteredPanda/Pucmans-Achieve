@@ -272,7 +272,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     /**
      * Generates the command usage. This takes the command path and adds all argument fields to the
      * command. For example:
-     * /parentcommand thiscommand <argument1> [argument2] [argument3]
+     * /parentcommand this command <argument1> [argument2] [argument3]
      * @return the command usage;
      */
     public String getCommandUsage()
@@ -322,7 +322,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
                 }
 
                 content.add(PARENT_COMMAND_HEADER.replace("{commandusage}",
-                        getCommandUsage()).replace("{commanddescrption}",
+                        getCommandUsage()).replace("{commanddescription}",
                         getDescription()));
 
                 if (childCommands.size() > 0) {
