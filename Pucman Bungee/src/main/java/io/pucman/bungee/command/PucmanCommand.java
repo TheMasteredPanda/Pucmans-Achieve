@@ -87,25 +87,25 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      * The following fields are primarily locale.
      */
     @ConfigPopulate(value = "Plugin.Command.PlayerOnlyCommand", format = true)
-    private String PLAYER_ONLY_COMMAND;
+    public String PLAYER_ONLY_COMMAND;
 
     @ConfigPopulate(value = "Plugin.Command.NoPermission", format = true)
-    private String NO_PERMISSION;
+    public String NO_PERMISSION;
 
     @ConfigPopulate(value = "Plugin.Command.NotEnoughArguments", format = true)
-    private String NOT_ENOUGH_ARGUMENTS;
+    public String NOT_ENOUGH_ARGUMENTS;
 
     @ConfigPopulate(value = "Plugin.Command.IncorrectArgumentInput", format = true)
-    private String INCORRECT_ARGUMENT_INPUT;
+    public String INCORRECT_ARGUMENT_INPUT;
 
     @ConfigPopulate(value = "Plugin.Command.ParentCommandHeader", color = true)
-    private String PARENT_COMMAND_HEADER;
+    public String PARENT_COMMAND_HEADER;
 
     @ConfigPopulate(value = "Plugin.Command.ChildCommandHeader", color = true)
-    private String CHILD_COMMAND_HEADER;
+    public String CHILD_COMMAND_HEADER;
 
     @ConfigPopulate(value = "Plugin.Command.CommandEntry", color = true)
-    private String COMMAND_ENTRY;
+    public String COMMAND_ENTRY;
 
 
     /**
@@ -316,11 +316,11 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
             if (args[0].equalsIgnoreCase("help")) {
                 LIB.debug(this, "First argument is 'help'");
                 LinkedList<String> content = Lists.newLinkedList();
-                
+
                 if (PARENT_COMMAND_HEADER == null) {
                     LIB.debug(this, "PARENT_COMMAND_HEADER is null.");
                 }
-                
+
                 content.add(PARENT_COMMAND_HEADER.replace("{commandusage}",
                         getCommandUsage()).replace("{commanddescrption}",
                         getDescription()));
