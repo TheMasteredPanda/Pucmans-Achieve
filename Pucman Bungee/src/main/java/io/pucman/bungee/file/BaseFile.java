@@ -1,5 +1,6 @@
 package io.pucman.bungee.file;
 
+import com.google.common.collect.Lists;
 import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.locale.Format;
 import io.pucman.common.exception.DeveloperException;
@@ -18,6 +19,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Wrapper for managing files,
@@ -84,7 +87,11 @@ public class BaseFile
     {
         Class clazz = instance.getClass();
         this.lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
-        for (Field f : clazz.getDeclaredFields()) {
+
+        List<Field> fieldList = Lists.newArrayList(clazz.getDeclaredFields());
+        fieldList.addAll(Arrays.asList(clazz.getFields()));
+
+        for (Field f : fieldList) {
             this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {
                 this.lib.debug(this, f.getName() + " does not have the correct annotation.");
