@@ -1,8 +1,11 @@
 package io.pucman.bungee.sender;
 
 import com.google.common.collect.Lists;
+import io.pucman.bungee.PLibrary;
+import io.pucman.bungee.locale.Format;
 import io.pucman.common.exception.UtilException;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 import java.util.List;
@@ -13,6 +16,8 @@ import java.util.stream.Collectors;
  */
 public final class Sender
 {
+    private static final PLibrary LIB = PLibrary.get();
+
     private Sender()
     {
         throw new UtilException();
@@ -25,7 +30,7 @@ public final class Sender
      */
     public static void send(CommandSender sender, String message)
     {
-        sender.sendMessage(new TextComponent(message));
+        sender.sendMessage(TextComponent.fromLegacyText(message));
     }
 
     /**
@@ -35,7 +40,7 @@ public final class Sender
      */
     public static void send(CommandSender sender, List<String> messages)
     {
-        List<TextComponent> components = messages.stream().map(TextComponent::new).collect(Collectors.toCollection(Lists::newLinkedList));
-        sender.sendMessage(components.toArray(new TextComponent[components.size()]));
+        List<BaseComponent[]> components = messages.stream().map(TextComponent::fromLegacyText).collect(Collectors.toCollection(Lists::newLinkedList));
+        components.forEach(sender::sendMessage);
     }
 }
