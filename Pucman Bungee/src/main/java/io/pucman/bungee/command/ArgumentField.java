@@ -13,5 +13,5 @@ import lombok.RequiredArgsConstructor;
 public class ArgumentField
 {
     private final String name;
-    private String def;
+    private boolean def;
 }

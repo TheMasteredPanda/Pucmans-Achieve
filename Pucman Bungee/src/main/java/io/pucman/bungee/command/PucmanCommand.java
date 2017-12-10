@@ -163,7 +163,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     public void arguments(ArgumentField... fields)
     {
         argumentFields.addAll(Arrays.asList(fields));
-        requiredArgumentFields = argumentFields.stream().filter(field -> field.getDef() != null).collect(Collectors.toCollection(Lists::newLinkedList));
+        requiredArgumentFields = argumentFields.stream().filter(ArgumentField::isDef).collect(Collectors.toCollection(Lists::newLinkedList));
     }
 
     /**
@@ -296,7 +296,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      * @param args - arguments.
      */
     @Override
-    public void execute(CommandSender sender, String[] args)
+    public final void execute(CommandSender sender, String[] args)
     {
 
         if (isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
@@ -312,7 +312,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
         }
 
         if (args.length >= 1) {
-            LIB.debug(this, "Argument length is bigger or equal than 1.");
+            LIB.debug(this, "Argument length is bigger or equal to 1.");
             if (args[0].equalsIgnoreCase("help")) {
                 LIB.debug(this, "First argument is 'help'");
                 LinkedList<String> content = Lists.newLinkedList();
@@ -367,7 +367,7 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
             LIB.debug(this, "There are no arguments.");
         }
 
-        if (args.length < getRequiredArgumentFields().size()) {
+        if (getRequiredArgumentFields().size() > args.length) {
             LIB.debug("Required arguments not found.");
             Sender.send(sender, NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", getCommandUsage()));
             return;

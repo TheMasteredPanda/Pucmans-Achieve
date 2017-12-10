@@ -12,11 +12,11 @@
     <repositories>
         <repository>
             <id>central</id>
-            <url>${env.MAVEN_RRM_URL}/central/</url>
+            <url>http://rrm.themasteredpanda.com/repository/central/</url>
         </repository>
         <repository>
             <id>snapshots</id>
-            <url>${env.MAVEN_RRM_URL}/snapshots/</url>
+            <url>http://rrm.themasteredpanda.com/repository/snapshots/</url>
         </repository>
     </repositories>
 
@@ -30,13 +30,13 @@
         <repository>
             <id>releases</id>
             <name>releases</name>
-            <url>${env.MAVEN_RRM_URL}/releases/</url>
+            <url>http://rrm.themasteredpanda.com/repository/releases/</url>
         </repository>
 
         <snapshotRepository>
             <id>snapshots</id>
             <name>snapshots</name>
-            <url>${env.MAVEN_RRM_URL}/snapshots/</url>
+            <url>http://rrm.themasteredpanda.com/repository/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
