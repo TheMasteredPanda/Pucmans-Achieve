@@ -24,6 +24,7 @@
         <module>Pucman Common</module>
         <module>Pucman Bungee</module>
         <module>Pucman Server</module>
+        <module>Pucman SQL</module>
     </modules>
 
     <distributionManagement>
@@ -69,6 +70,12 @@
             <artifactId>guice</artifactId>
             <version>3.0</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.pucman</groupId>
+            <artifactId>pucman-common</artifactId>
+            <version>1.2</version>
         </dependency>
 
         <dependency>
