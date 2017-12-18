@@ -11,8 +11,6 @@ import lombok.SneakyThrows;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -80,26 +78,5 @@ public class Client
         }
 
         return source.getConnection();
-    }
-
-    @SneakyThrows
-    public void close(Object... objects)
-    {
-        for (Object o : objects) {
-            if (o instanceof Connection) {
-                Connection c = (Connection) o;
-                c.close();
-            }
-
-            if (o instanceof Statement) {
-                Statement s = (Statement) o;
-                s.close();
-            }
-
-            if (o instanceof ResultSet) {
-                ResultSet set = (ResultSet) o;
-                set.close();
-            }
-        }
     }
 }
