@@ -12,11 +12,11 @@
     <repositories>
         <repository>
             <id>central</id>
-            <url>http://rrm.themasteredpanda.com/repository/central/</url>
+            <url>http://rrm.themasteredpanda.com/repository/central</url>
         </repository>
         <repository>
             <id>snapshots</id>
-            <url>http://rrm.themasteredpanda.com/repository/snapshots/</url>
+            <url>http://rrm.themasteredpanda.com/repository/maven/maven-snapshots/</url>
         </repository>
     </repositories>
 
