@@ -11,12 +11,8 @@
 
     <repositories>
         <repository>
-            <id>central</id>
-            <url>http://rrm.themasteredpanda.com/repository/central</url>
-        </repository>
-        <repository>
-            <id>snapshots</id>
-            <url>http://rrm.themasteredpanda.com/repository/maven/maven-snapshots/</url>
+            <id>personal-central</id>
+            <url>http://rrm.themasteredpanda.com/repository/maven-central</url>
         </repository>
     </repositories>
 
@@ -70,12 +66,6 @@
             <artifactId>guice</artifactId>
             <version>3.0</version>
             <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.pucman</groupId>
-            <artifactId>pucman-common</artifactId>
-            <version>1.2</version>
         </dependency>
 
         <dependency>

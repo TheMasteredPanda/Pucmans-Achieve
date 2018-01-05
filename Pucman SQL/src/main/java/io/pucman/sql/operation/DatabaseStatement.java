@@ -34,10 +34,9 @@ public abstract class DatabaseStatement<T>
     /**
      * Used to invoke the statement asynchronously. You can either execute it in a non-blocking or blocking
      * way.
-     * @param blocking - if true, the statement will execute asynchronously blocking, else asynchronously non-blocking.
      * @return return value.
      */
-    public abstract T async(boolean blocking);
+    public abstract T async();
 
     /**
      * Used to invoke the statement synchronously.

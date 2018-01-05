@@ -30,5 +30,11 @@
             <artifactId>HikariCP</artifactId>
             <version>2.7.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.pucman</groupId>
+            <artifactId>pucman-common</artifactId>
+            <version>1.2</version>
+        </dependency>
     </dependencies>
 </project>

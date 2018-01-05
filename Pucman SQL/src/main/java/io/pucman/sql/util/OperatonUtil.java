@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 public final class OperatonUtil
 {
@@ -72,5 +73,25 @@ public final class OperatonUtil
         }
 
         return fields;
+    }
+
+
+    /**
+     * Formats all mapped fields into a string that'll be used in the construction of the query.
+     * @return the string.
+     */
+    public static  <T> String getJoinedColumns(LinkedList<Field> mappedFields, T instance)
+    {
+        return mappedFields.stream().map(field -> {
+            field.setAccessible(true);
+
+            try {
+                return field.getName() + "=" + field.get(instance);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }).collect(Collectors.joining(", "));
     }
 }
