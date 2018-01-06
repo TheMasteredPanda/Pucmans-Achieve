@@ -17,4 +17,8 @@ public @interface Column
      * Column name.
      */
     String value();
+
+    int digitRange() default 0;
+
+    int decimalRange() default 0;
 }

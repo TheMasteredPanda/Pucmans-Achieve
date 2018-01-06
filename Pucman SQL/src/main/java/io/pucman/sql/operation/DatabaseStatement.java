@@ -26,6 +26,7 @@ public abstract class DatabaseStatement<T>
         this.service = database.getService();
     }
 
+
     /**
      * Invoked to construct the sql statement.
      */

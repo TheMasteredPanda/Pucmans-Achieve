@@ -1,12 +1,10 @@
 package io.pucman.sql.operation.crud;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.sql.database.Database;
 import io.pucman.sql.operation.DatabaseStatement;
 import io.pucman.sql.util.OperatonUtil;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
@@ -21,26 +19,19 @@ import java.util.concurrent.ExecutionException;
 public class InsertOperation<T> extends DatabaseStatement<Void>
 {
     private String tableName;
-    private LinkedList<Field> mappedFields = Lists.newLinkedList();
+    private LinkedList<Field> mappedFields;
     private T instance;
 
-    public InsertOperation(Database database)
+    /**
+     * @param database - database instance.
+     * @param instance - object that will be inserted into the specified table.
+     */
+    public InsertOperation(Database database, T instance)
     {
         super(database);
-    }
-
-    /**
-     * A mandatory method. Without the object this query would not
-     * execute successfully.
-     * @param instance - object to be deserialized and inserted into the table.
-     * @return
-     */
-    public InsertOperation insert(@NonNull T instance)
-    {
         this.tableName = OperatonUtil.getTableName(instance);
         this.mappedFields = OperatonUtil.getMappedFields(instance);
         this.instance = instance;
-        return this;
     }
 
     /**

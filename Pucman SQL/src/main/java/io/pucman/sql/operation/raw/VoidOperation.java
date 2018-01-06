@@ -22,9 +22,14 @@ public class VoidOperation extends DatabaseStatement<Void>
     private String query;
     private Object[] values;
 
-    public VoidOperation(Database database)
+    private VoidOperation(Database database)
     {
         super(database);
+    }
+
+    public static VoidOperation create(Database database)
+    {
+        return new VoidOperation(database);
     }
 
     public VoidOperation query(String query)
@@ -53,42 +58,21 @@ public class VoidOperation extends DatabaseStatement<Void>
     }
 
     @Override
-    public Void async(boolean blocking)
+    public Void async()
     {
         PreparedStatement statement = construct();
-        if (blocking) {
-            CountDownLatch latch = new CountDownLatch(1);
 
-            getService().submit(() -> {
-               try {
-                   statement.execute();
-               } catch (SQLException e) {
-                   throw new DeveloperException(e);
-               } catch (Exception e) {
-                   e.printStackTrace();
-               } finally {
-                   OperatonUtil.close(statement, getConnection());
-               }
-            });
-
+        CompletableFuture.runAsync(() -> {
             try {
-                latch.await(15, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
+                statement.execute();
+            } catch (SQLException e) {
+                throw new DeveloperException(e);
+            } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                OperatonUtil.close(statement, getConnection());
             }
-        } else {
-            CompletableFuture.runAsync(() -> {
-               try {
-                   statement.execute();
-               } catch (SQLException e) {
-                   throw new DeveloperException(e);
-               } catch (Exception e) {
-                   e.printStackTrace();
-               } finally {
-                   OperatonUtil.close(statement, getConnection());
-               }
-            }, getService());
-        }
+        }, getService());
 
         return null;
     }
@@ -96,16 +80,28 @@ public class VoidOperation extends DatabaseStatement<Void>
     @Override
     public Void sync()
     {
-        PreparedStatement statement = this.construct();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        getService().submit(() -> {
+            PreparedStatement statement = this.construct();
+
+            try {
+                statement.execute();
+            } catch (SQLException e) {
+                throw new DeveloperException(e);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                OperatonUtil.close(statement, this.getConnection());
+                latch.countDown();
+            }
+
+        });
 
         try {
-            statement.execute();
-        } catch (SQLException e) {
-            throw new DeveloperException(e);
-        } catch (Exception e) {
+            latch.await(15, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
-            OperatonUtil.close(statement, this.getConnection());
         }
 
         return null;

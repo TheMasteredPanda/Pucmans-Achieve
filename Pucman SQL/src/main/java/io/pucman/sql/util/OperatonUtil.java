@@ -3,6 +3,8 @@ package io.pucman.sql.util;
 import com.google.common.collect.Lists;
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.exception.UtilException;
+import io.pucman.common.math.NumberUtil;
+import io.pucman.sql.DataType;
 import io.pucman.sql.annotation.Column;
 import io.pucman.sql.annotation.Table;
 import lombok.SneakyThrows;
@@ -93,5 +95,59 @@ public final class OperatonUtil
 
             return null;
         }).collect(Collectors.joining(", "));
+    }
+
+    public static DataType getCorrespondingDataType(Class clazz)
+    {
+        for (DataType type : DataType.values()) {
+            if (!type.getCorrespondingClasses().contains(clazz)) {
+                continue;
+            }
+
+            return type;
+        }
+
+        throw new DeveloperException("Couldn't find data type for " + clazz.getName() + ".");
+    }
+
+    /**
+     * Checks if the value held by the field is within the minimum and maximum
+     * boundaries.
+     * @param instance - instance of the class the field is located in.
+     * @param field - field to check.
+     * @return true if the value is acceptable, else false.
+     */
+    @SneakyThrows
+    public static <T> boolean isAcceptableValue(T instance, Field field)
+    {
+        field.setAccessible(true);
+
+        if (!(field.get(instance) instanceof Number)) {
+            throw new DeveloperException("Field is not an instance of number.");
+        }
+
+        double value = NumberUtil.parse((String) field.get(instance), double.class);
+        DataType type = getCorrespondingDataType(field.getType());
+        return type.getMinimumAcceptedValue() <= value && type.getMaximumAcceptValue() >= value;
+    }
+
+    /**
+     * Checks if the data type has a digit range.
+     * @param dataType - data type to check.
+     * @return true if it does, else false.
+     */
+    public static boolean hasDigitRange(DataType dataType)
+    {
+        return dataType.getMaximumDigitSize() == -1;
+    }
+
+    /**
+     * Checks if the data type has a decimal range.
+     * @param dataType - data type to check.
+     * @return true if it does, else false.
+     */
+    public static boolean hasDecimalRange(DataType dataType)
+    {
+        return dataType.getSupportedDecimals() == -1;
     }
 }
