@@ -2,7 +2,6 @@ package io.pucman.sql.operation.crud;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.ListenableFuture;
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.reflect.accessors.FieldAccessor;
 import io.pucman.sql.database.Database;
@@ -28,6 +27,7 @@ public class UpdateOperation<T> extends ConditionOperation<Void>
     private LinkedList<FieldAccessor> mappedFields = Lists.newLinkedList();
     private LinkedHashMap<String, Object> values = Maps.newLinkedHashMap();
     private T instance;
+    private ReentrantLock lock = new ReentrantLock();
 
     public UpdateOperation(Database database, String tableName)
     {
@@ -37,6 +37,7 @@ public class UpdateOperation<T> extends ConditionOperation<Void>
 
     /**
      * Set the object that will be used to update it's deserialized data on the sql database.
+     *
      * @param instance - object.
      * @return this.
      */
@@ -50,8 +51,9 @@ public class UpdateOperation<T> extends ConditionOperation<Void>
 
     /**
      * If an object is not passed, then you can specify which rows to update.
+     *
      * @param column - column name.
-     * @param value - value to set it to.
+     * @param value  - value to set it to.
      * @return this.
      */
     public UpdateOperation set(@NonNull String column, @NonNull Object value)
@@ -62,9 +64,11 @@ public class UpdateOperation<T> extends ConditionOperation<Void>
 
     /**
      * Constructs the statement.
+     *
      * @return PreparedStatement instance.
      */
-    @Override @SneakyThrows
+    @Override
+    @SneakyThrows
     protected PreparedStatement construct()
     {
         String query = "UPDATE %s SET %s";
@@ -96,20 +100,7 @@ public class UpdateOperation<T> extends ConditionOperation<Void>
     @Override
     public Void async()
     {
-        getService().submit(() -> {
-            PreparedStatement statement = construct();
-
-            try {
-                statement.executeUpdate();
-            } catch (SQLException e) {
-                throw new DeveloperException(e);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                OperationUtil.close(getConditionString(), statement);
-            }
-        });
-
+        getService().submit(this::process);
         return null;
     }
 
@@ -119,28 +110,31 @@ public class UpdateOperation<T> extends ConditionOperation<Void>
     @Override
     public Void sync()
     {
-        ReentrantLock lock = new ReentrantLock();
+        try {
+            lock.lock();
+            process();
+        } finally {
+            lock.unlock();
+        }
 
-        ListenableFuture<Boolean> future = getService().submit(() -> {
-            PreparedStatement statement = construct();
-
-            try {
-                lock.lock();
-                statement.executeUpdate();
-            } catch (SQLException e) {
-
-                throw new DeveloperException(e);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            } finally {
-                OperationUtil.close(getConnection(), statement);
-            }
-
-            return true;
-        });
-
-        future.addListener(lock::unlock, getService());
         return null;
+    }
+
+
+    @SneakyThrows
+    private void process()
+    {
+        PreparedStatement statement = construct();
+
+        try {
+            lock.lock();
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeveloperException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            OperationUtil.close(getConnection(), statement);
+        }
     }
 }

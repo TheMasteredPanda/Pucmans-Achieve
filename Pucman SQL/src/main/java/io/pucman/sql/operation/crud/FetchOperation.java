@@ -72,18 +72,32 @@ public class FetchOperation<T> extends ConditionOperation<T>
         return this;
     }
 
+    /**
+     * Onc the data fetched is either serialized, or the fetch is more than one column in the table,
+     * it will store and return it as a Multimap.
+     * @return Multimap of serialized or raw data.
+     */
     public FetchOperation asMultimap()
     {
         structureAsMultiMap = !structureAsMultiMap;
         return this;
     }
 
+    /**
+     * Specifying the table the data will be fetched from.
+     * @param tableName - table name.
+     * @return this.
+     */
     public FetchOperation from(String tableName)
     {
         this.tableName = tableName;
         return this;
     }
 
+    /**
+     * Executes the operation asynchronously.
+     * @return data that has either been structured in a list or map, serialized objects that have been stored in a list or map, or a serialized object.
+     */
     @Override
     public T async()
     {
@@ -98,6 +112,10 @@ public class FetchOperation<T> extends ConditionOperation<T>
         }
     }
 
+    /**
+     * Executes the operation synchronously.
+     * @return data that has either been structured in a list or map, serialized objects that have been stored in a list or map, or a serialized object.
+     */
     @Override
     public T sync()
     {
@@ -111,6 +129,10 @@ public class FetchOperation<T> extends ConditionOperation<T>
         }
     }
 
+    /**
+     * The actual operation.
+     * @return data.
+     */
     @SneakyThrows
     private T process()
     {
@@ -161,6 +183,7 @@ public class FetchOperation<T> extends ConditionOperation<T>
                     e.printStackTrace();
                 }
 
+                OperationUtil.close(set);
                 return GenericUtil.cast(instance);
             }
         } else if (OperationUtil.getFetchSize(set) > 1) {
@@ -205,6 +228,7 @@ public class FetchOperation<T> extends ConditionOperation<T>
                     }
                 }
 
+                OperationUtil.close(set);
                 return GenericUtil.cast(result);
             }
 
@@ -219,6 +243,7 @@ public class FetchOperation<T> extends ConditionOperation<T>
                         }
                     }
 
+                    OperationUtil.close(set);
                     return GenericUtil.cast(result);
                 } else {
                     Multimap<Integer, Object> result = LinkedListMultimap.create();
@@ -257,12 +282,12 @@ public class FetchOperation<T> extends ConditionOperation<T>
                         result.put(iteration, instance);
                     }
 
+                    OperationUtil.close(set);
                     return GenericUtil.cast(result);
                 }
             }
         }
 
-        //TODO DeveloperException
         return null;
     }
 }

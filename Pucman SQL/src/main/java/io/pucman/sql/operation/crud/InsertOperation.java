@@ -1,6 +1,5 @@
 package io.pucman.sql.operation.crud;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.reflect.accessors.FieldAccessor;
 import io.pucman.sql.database.Database;
@@ -11,7 +10,7 @@ import lombok.SneakyThrows;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedList;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Builder for insert operations.
@@ -21,6 +20,7 @@ public class InsertOperation<T> extends DatabaseStatement<Void>
     private String tableName;
     private LinkedList<FieldAccessor> mappedFields;
     private T instance;
+    private ReentrantLock lock = new ReentrantLock();
 
     /**
      * @param database - database instance.
@@ -50,25 +50,8 @@ public class InsertOperation<T> extends DatabaseStatement<Void>
     @Override
     public Void async()
     {
-        ListenableFuture<Void> future = getService().submit(() -> {
-            PreparedStatement statement = construct();
-
-            try {
-                statement.execute();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                OperationUtil.close(getConnection(), statement);
-            }
-
-            return null;
-        });
-
-        try {
-            return future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new DeveloperException(e);
-        }
+        getService().submit(this::process);
+        return null;
     }
 
     /**
@@ -76,6 +59,19 @@ public class InsertOperation<T> extends DatabaseStatement<Void>
      */
     @Override
     public synchronized Void sync()
+    {
+        try {
+            lock.lock();
+            process();
+        } finally {
+            lock.unlock();
+        }
+
+        return null;
+    }
+
+    @SneakyThrows
+    private void process()
     {
         PreparedStatement statement = construct();
 
@@ -88,7 +84,5 @@ public class InsertOperation<T> extends DatabaseStatement<Void>
         } finally {
             OperationUtil.close(getConnection(), statement);
         }
-
-        return null;
     }
 }
