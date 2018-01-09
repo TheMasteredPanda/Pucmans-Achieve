@@ -7,13 +7,14 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.pucman.common.exception.DeveloperException;
+import io.pucman.common.reflect.accessors.FieldAccessor;
 import io.pucman.sql.DataType;
 import io.pucman.sql.annotation.Column;
 import io.pucman.sql.annotation.Table;
 import io.pucman.sql.operation.crud.InsertOperation;
 import io.pucman.sql.operation.crud.UpdateOperation;
 import io.pucman.sql.operation.raw.VoidOperation;
-import io.pucman.sql.util.OperatonUtil;
+import io.pucman.sql.util.OperationUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -52,12 +53,12 @@ public class Database
             throw new DeveloperException("Can't create a table without the @Table annotation.");
         }
 
-        LinkedList<Field> columns = OperatonUtil.getMappedFields(template);
+        LinkedList<FieldAccessor> columns = OperationUtil.getMappedFields(template);
         LinkedHashMap<Field, DataType> types = Maps.newLinkedHashMap();
 
-        for (Field column : columns) {
-            DataType type = OperatonUtil.getCorrespondingDataType(column.getType());
-            types.put(column, type);
+        for (FieldAccessor column : columns) {
+            DataType type = OperationUtil.getCorrespondingDataType(column.getType());
+            types.put(column.get(), type);
         }
 
         StringBuilder columnQuerySection = new StringBuilder();
@@ -70,11 +71,10 @@ public class Database
         for (Map.Entry<Field, DataType> type : types.entrySet()) {
             iteration++;
             StringBuilder sb = new StringBuilder();
-            boolean digitRange = OperatonUtil.hasDigitRange(type.getValue());
-            boolean decimalRange = OperatonUtil.hasDecimalRange(type.getValue());
+            boolean digitRange = OperationUtil.hasDigitRange(type.getValue());
+            boolean decimalRange = OperationUtil.hasDecimalRange(type.getValue());
 
             Column annotation = type.getKey().getAnnotation(Column.class);
-
             sb.append(annotation.value()).append(" ").append(type.getValue().name());
 
             if (digitRange || decimalRange) {
@@ -111,7 +111,7 @@ public class Database
         }
 
         VoidOperation operation = VoidOperation.create(this);
-        operation.query(String.format("CREATE TABLE IF NOT EXISTS %s(%s)", table.value(), columnQuerySection.toString()));
+        operation.query(String.format("CREATE TABLE IF NOT EXISTS %s(%s);", table.value(), columnQuerySection.toString()));
 
         try {
             if (async) {
@@ -135,7 +135,7 @@ public class Database
     public boolean drop(String tableName, boolean async)
     {
         try {
-            VoidOperation operation = VoidOperation.create(this).query(String.format("DROP TABLE %s", tableName));
+            VoidOperation operation = VoidOperation.create(this).query(String.format("DROP TABLE %s;", tableName));
 
             if (async) {
                 operation.async();
@@ -188,24 +188,25 @@ public class Database
     Database database;
     Object instance;
 
-    Update:
+    Update [DONE]:
     database.update("tableName").set("value1", value).where("uuid", uuid).sync();
     database.update("tableName").set(instance);
 
-    Insert:
+    Insert [DONE]:
     database.insert(instance).async();
 
-    Delete:
+    Delete [DONE]:
     database.delete(instance).sync();
     database.delete().from("tableName").where("uuid", uuid).async();
 
     Select:
-    database.select(TemplateClass.class).from("tableName").async();
-    database.select(TemplateClass.class).from("tableName").where("uuid", uuid).and("block-breaks", 165)
+    database.fetch(TemplateClass.class).from("tableName").async();
+    database.fetch(TemplateClass.class).from("tableName").where("uuid", uuid).and("block-breaks", 165)
 
     StatementFunction, ManipulationFunction, PostTransactionFunction
     database.query("SELECT * FROM table", (statement) -> {}, (result) -> {}, () -> {})
-    /*
+
+
     TODO:
     - Update Operation
     - Insert Operation

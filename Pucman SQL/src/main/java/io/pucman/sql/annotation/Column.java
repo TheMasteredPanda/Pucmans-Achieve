@@ -16,7 +16,7 @@ public @interface Column
     /**
      * Column name.
      */
-    String value();
+    String value() default "null";
 
     int digitRange() default 0;
 

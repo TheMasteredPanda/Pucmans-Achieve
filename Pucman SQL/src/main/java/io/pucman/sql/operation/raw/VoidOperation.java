@@ -3,7 +3,7 @@ package io.pucman.sql.operation.raw;
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.sql.database.Database;
 import io.pucman.sql.operation.DatabaseStatement;
-import io.pucman.sql.util.OperatonUtil;
+import io.pucman.sql.util.OperationUtil;
 import lombok.SneakyThrows;
 
 import java.sql.PreparedStatement;
@@ -70,7 +70,7 @@ public class VoidOperation extends DatabaseStatement<Void>
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                OperatonUtil.close(statement, getConnection());
+                OperationUtil.close(statement, getConnection());
             }
         }, getService());
 
@@ -92,7 +92,7 @@ public class VoidOperation extends DatabaseStatement<Void>
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                OperatonUtil.close(statement, this.getConnection());
+                OperationUtil.close(statement, this.getConnection());
                 latch.countDown();
             }
 
