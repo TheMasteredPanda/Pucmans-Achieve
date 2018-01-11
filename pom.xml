@@ -12,7 +12,7 @@
     <repositories>
         <repository>
             <id>personal-central</id>
-            <url>http://rrm.themasteredpanda.com/repository/maven-central</url>
+            <url>http://rrm.themasteredpanda.com/repository/maven-group/</url>
         </repository>
     </repositories>
 
@@ -25,13 +25,13 @@
 
     <distributionManagement>
         <repository>
-            <id>releases</id>
+            <id>ossrh</id>
             <name>releases</name>
             <url>http://rrm.themasteredpanda.com/repository/releases/</url>
         </repository>
 
         <snapshotRepository>
-            <id>snapshots</id>
+            <id>ossrh</id>
             <name>snapshots</name>
             <url>http://rrm.themasteredpanda.com/repository/snapshots/</url>
         </snapshotRepository>
