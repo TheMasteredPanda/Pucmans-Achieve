@@ -5,11 +5,6 @@ jdk:
   - openjdk8
   - openjdk9
 
-env:
-  global:
-    - SONATYPE_USERNAME=admin
-    - secure: "your encrypted SONATYPE_PASSWORD=WhitePanda1819"
-
 before_install:
   - git config --global user.email "travis-ci@travis-ci.org"
   - git config --global user.name "Travis CI"
