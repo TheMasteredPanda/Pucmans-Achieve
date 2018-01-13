@@ -16,5 +16,5 @@ cache:
   directories:
     - '$HOME/.m2/repository'
 
-script: mvn clean package --settings ~/.m2/settings.xml
-after_success: mvn clean deploy --settings ~/.m2/settings.xml
+script: mvn clean package --settings ~/.m2/settings.xml -X -e --debug
+after_success: mvn clean deploy --settings ~/.m2/settings.xml -X -e --debug
