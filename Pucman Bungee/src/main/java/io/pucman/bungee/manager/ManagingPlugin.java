@@ -11,7 +11,6 @@ import java.util.Arrays;
 /**
  * Used for main classes of plugins.
  *
- * @see io.pucman.bungee.plugin.LibPlugin
  * @see io.pucman.bungee.PLibrary
  */
 public class ManagingPlugin extends Plugin
@@ -56,7 +55,7 @@ public class ManagingPlugin extends Plugin
     {
         Manager managerInstance = this.managers.values().stream().filter(m -> m.getClass().equals(manager)).findFirst().<M>map(GenericUtil::cast).orElse(null);
 
-        if (managerInstance== null) {
+        if (managerInstance == null) {
             System.out.println("m is null, tried to get " + manager.getName() + " manager. Currency size of loaded managers list is: " + String.valueOf(this.managers.size()));
             throw new DeveloperException("m is null.");
         }

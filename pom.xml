@@ -20,24 +20,25 @@
         <module>Pucman Common</module>
         <module>Pucman Bungee</module>
         <module>Pucman Server</module>
-        <module>Pucman SQL</module>
+        <module>Pucman Module</module>
     </modules>
 
     <distributionManagement>
         <repository>
-            <id>personal-central</id>
+            <id>personal-releases</id>
             <name>releases</name>
-            <url>http://rrm.themasteredpanda.com/repository/releases/</url>
+            <url>http://rrm.themasteredpanda.com/repository/maven-releases/</url>
         </repository>
 
         <snapshotRepository>
-            <id>personal-central</id>
+            <id>personal-snapshots</id>
             <name>snapshots</name>
-            <url>http://rrm.themasteredpanda.com/repository/snapshots/</url>
+            <url>http://rrm.themasteredpanda.com/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
     <build>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -1,7 +1,6 @@
 package io.pucman.bungee.manager;
 
 import lombok.Getter;
-import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -10,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * library section.
  * @param <P>
  */
-public class Manager<P extends Plugin>
+public class Manager<P extends ManagingPlugin>
 {
     protected P instance;
     private AtomicBoolean enable = new AtomicBoolean(false);
