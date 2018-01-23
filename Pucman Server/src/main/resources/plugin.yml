@@ -1,5 +1,5 @@
 main: io.pucman.server.PLibrary
 author: TheMasteredPanda
-version: 1.0
-name: PLibrary-Bungee-1.0
+version: 1.3.01
+name: PLibrary-Bungee-1.3.01
 load: STARTUP
