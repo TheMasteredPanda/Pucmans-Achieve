@@ -27,13 +27,13 @@
         <repository>
             <id>personal-central</id>
             <name>releases</name>
-            <url>http://rrm.themasteredpanda.com/repository/releases/</url>
+            <url>http://rrm.themasteredpanda.com/repository/maven-releases/</url>
         </repository>
 
         <snapshotRepository>
             <id>personal-central</id>
             <name>snapshots</name>
-            <url>http://rrm.themasteredpanda.com/repository/snapshots/</url>
+            <url>http://rrm.themasteredpanda.com/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
