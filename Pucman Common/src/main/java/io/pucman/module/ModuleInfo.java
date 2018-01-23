@@ -5,12 +5,12 @@ import lombok.Getter;
 /**
  * Holds all module metadata.
  */
+@Getter
 public class ModuleInfo
 {
     /**
      * An immutable array of developers who helped write or contributed to this module.
      */
-    @Getter
     private String[] authors;
 
     /**
@@ -22,4 +22,6 @@ public class ModuleInfo
      * Name of module.
      */
     private String name;
+
+    private boolean immutableModule;
 }

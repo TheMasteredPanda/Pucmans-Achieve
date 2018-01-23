@@ -1,9 +1,11 @@
-package io.pucman.bungee.manager;
+package io.pucman.bungee.manager.module;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.TreeTraverser;
 import io.pucman.bungee.PLibrary;
+import io.pucman.bungee.manager.Manager;
+import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.reflect.ReflectUtil;
 import io.pucman.common.reflect.accessors.ConstructorAccessor;
 import io.pucman.module.DefaultModuleTraverserFunction;
@@ -11,8 +13,10 @@ import io.pucman.module.Dependencies;
 import io.pucman.module.Module;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
+@ParametersAreNonnullByDefault
 public class ModuleManager extends Manager<PLibrary>
 {
     private TreeMap<Plugin, List<Class<? extends Module>>> dependencyMap = Maps.newTreeMap(Collections.reverseOrder());
@@ -70,6 +74,7 @@ public class ModuleManager extends Manager<PLibrary>
                 Module m = accessor.call();
                 loadedModules.put(plugin, m);
             } catch (Exception e) {
+                e.printStackTrace();
                 //TODO: store the exception in the a map. Make a commend to display a formatted error on the server.
                 //TODO: or make a Bugsnag instance to direct all stacktraces to.
 
@@ -99,4 +104,36 @@ public class ModuleManager extends Manager<PLibrary>
         return list;
     }
 
+    /**
+     * Initiates the shutdown process of the module passed in the parameters.
+     *
+     * The module will also check and, if successful, shutdown the dependencies
+     * of the module that will be shutdown to remove the concern of ram being
+     * unnecessarily used up.
+     *
+     * @param module - module to be shutdown.
+     */
+    public void shutdown(Module module)
+    {
+        if (module.getInfo().isImmutableModule()) {
+            throw new DeveloperException("Cannot shutdown module " + module.getInfo().getName() + ". It is an immutable module.");
+        }
+
+        List<Class<? extends Module>> dependencies = getOnlyModuleDependencies(module.getClass());
+
+        if (!dependencies.isEmpty()) {
+            for (Class<? extends Module> dependency : dependencies) {
+                Module depend = loadedModules.values().stream().filter(module1 -> module1.getClass().getName().equals(dependencies.getClass().getName())).findFirst().orElse(null);
+
+                if (depend == null) {
+                    instance.getLogger().warning("Could not get loaded dependency " + dependency.getSimpleName() + ". Maybe it wasn't loaded at all?");
+                    continue;
+                }
+
+                //TODO: the rest.
+            }
+        }
+
+        module.shutdown();
+    }
 }
