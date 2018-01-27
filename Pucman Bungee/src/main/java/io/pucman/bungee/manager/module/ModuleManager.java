@@ -15,11 +15,12 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
 public class ModuleManager extends Manager<PLibrary>
 {
-    private TreeMap<Plugin, List<Class<? extends Module>>> dependencyMap = Maps.newTreeMap(Collections.reverseOrder());
+    private TreeMap<Plugin, List<Class<? extends Module>>> dependencyMap = new TreeMap<>();
     private TreeTraverser traverser = TreeTraverser.using(new DefaultModuleTraverserFunction(Manager.class));
     private HashMap<Plugin, Module> loadedModules = Maps.newHashMap();
     private ArrayList<Class<? extends Module>> cannotLoad = Lists.newArrayList();
@@ -29,6 +30,11 @@ public class ModuleManager extends Manager<PLibrary>
         super(instance, Priority.HIGH);
     }
 
+    /**
+     * Registers the immutable array.
+     * @param plugin - plugin the modules belong to.
+     * @param modules - array of modules.
+     */
     public void register(Plugin plugin, Class<? extends Module>... modules)
     {
         ArrayList<Class<? extends Module>> examineList = Lists.newArrayList(modules);
@@ -42,11 +48,20 @@ public class ModuleManager extends Manager<PLibrary>
         dependencyMap.put(plugin, traverser.breadthFirstTraversal(examineList).toList());
     }
 
+    /**
+     * Get the load order of all the modules on the server.
+     * @return load order.
+     */
     public TreeMap<Plugin, List<Class<? extends Module>>> getLoadOrder()
     {
-        return dependencyMap;
+        return dependencyMap.descendingKeySet().stream().collect(Collectors.toMap(key -> key, this::getLoadOrder, (a, b) -> b, TreeMap::new));
     }
 
+    /**
+     * Gets the load order of the modules.
+     * @param plugin - plugin the modules belong to.
+     * @return load order.
+     */
     public LinkedList<Class<? extends Module>> getLoadOrder(Plugin plugin)
     {
         List<Class<? extends Module>> modules = this.dependencyMap.get(plugin);
@@ -54,6 +69,10 @@ public class ModuleManager extends Manager<PLibrary>
         return Lists.newLinkedList(modules);
     }
 
+    /**
+     * Boots all the modules belonging to the plugin.
+     * @param plugin - plugin instance.
+     */
     public void boot(Plugin plugin)
     {
         List<Class<? extends Module>> modules = dependencyMap.get(plugin);
@@ -84,6 +103,11 @@ public class ModuleManager extends Manager<PLibrary>
         }
     }
 
+    /**
+     * Gets a list of dependencies the module depends on.
+     * @param module - module to examine.
+     * @return dependency list.
+     */
     public List<Class<? extends Module>> getOnlyModuleDependencies(Class<? extends Module> module)
     {
         if (!module.isAnnotationPresent(Dependencies.class)) {
@@ -130,10 +154,24 @@ public class ModuleManager extends Manager<PLibrary>
                     continue;
                 }
 
-                //TODO: the rest.
+                if (dependedBy(dependency) < 2) {
+                    shutdown(depend);
+                } else {
+                    instance.getLogger().warning("Could not shutdown module " + dependency.getSimpleName() + " as it is being used by one or more loaded module.");
+                }
             }
         }
 
         module.shutdown();
+    }
+
+    /**
+     * Gets the amount of modules depending on this dependency.
+     * @param module - module to examine.
+     * @return amount of modules depending.
+     */
+    public int dependedBy(Class<? extends Module> module)
+    {
+        return loadedModules.values().stream().filter(module1 -> module1.getClass().isAnnotationPresent(Dependencies.class)).map(module1 -> module1.getClass().getAnnotation(Dependencies.class)).mapToInt(dependencies -> (int) Arrays.stream(dependencies.value()).filter(depend -> depend.equals(module)).count()).sum();
     }
 }

@@ -20,7 +20,6 @@
         <module>Pucman Common</module>
         <module>Pucman Bungee</module>
         <module>Pucman Server</module>
-        <module>Pucman Module</module>
     </modules>
 
     <distributionManagement>
