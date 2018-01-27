@@ -1,7 +1,6 @@
 package io.pucman.bungee.module;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.TreeTraverser;
 import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.manager.Manager;
@@ -17,12 +16,15 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Manager for managing modules.
+ */
 @ParametersAreNonnullByDefault
 public class ModuleManager extends Manager<PLibrary>
 {
     private TreeMap<Plugin, List<Class<? extends Module>>> dependencyMap = new TreeMap<>();
+    private TreeMap<Plugin, List<Module>> loadedModules = new TreeMap<>();
     private TreeTraverser traverser = TreeTraverser.using(new DefaultModuleTraverserFunction(Manager.class));
-    private HashMap<Plugin, Module> loadedModules = Maps.newHashMap();
     private ArrayList<Class<? extends Module>> cannotLoad = Lists.newArrayList();
 
     public ModuleManager(PLibrary instance)
@@ -81,6 +83,8 @@ public class ModuleManager extends Manager<PLibrary>
             return;
         }
 
+        if (!loadedModules.containsKey(plugin)) loadedModules.put(plugin, Lists.newLinkedList());
+
         for (Class<? extends Module> entry : modules) {
             if (cannotLoad.contains(entry)) {
                 instance.getLogger().info("Cannot load module " + entry.getSimpleName() + ". Seems like on of it's dependencies has problems loading.");
@@ -91,16 +95,47 @@ public class ModuleManager extends Manager<PLibrary>
             try {
                 ConstructorAccessor<? extends Module> accessor = ReflectUtil.getConstructor(entry, ReflectUtil.Type.DECLARED);
                 Module m = accessor.call();
-                loadedModules.put(plugin, m);
+                loadedModules.get(plugin).add(m);
             } catch (Exception e) {
                 e.printStackTrace();
                 //TODO: store the exception in the a map. Make a commend to display a formatted error on the server.
-                //TODO: or make a Bugsnag instance to direct all stacktraces to.
+                //TODO: or make a Bugsnag instance to direct all stacktraces too.
 
                 cannotLoad.add(entry);
-                cannotLoad.addAll(getOnlyModuleDependencies(entry));
+                cannotLoad.addAll(getModulesDepending(entry));
             }
         }
+    }
+
+
+    public void shutdown(Plugin plugin)
+    {
+        loadedModules.get(plugin).forEach(this::shutdown);
+    }
+
+    /**
+     * Gets a list of modules depending on the dependency.
+     * @param dependency - module other modules may be depending on.
+     * @return a list of modules depending on that particular dependency.
+     */
+    public List<Class<? extends Module>> getModulesDepending(Class<? extends Module> dependency)
+    {
+        if (!dependency.isAnnotationPresent(Dependencies.class)) {
+            return Lists.newArrayList();
+        }
+
+        Dependencies dependencies = dependency.getAnnotation(Dependencies.class);
+        List<Class<? extends Module>> modules = Lists.newLinkedList();
+
+        for (Class<?> depend : dependencies.value()) {
+            if (depend.isAssignableFrom(Manager.class)) {
+                continue;
+            }
+
+            modules.add((Class<? extends Module>) depend);
+        }
+
+        return modules;
     }
 
     /**
@@ -147,7 +182,14 @@ public class ModuleManager extends Manager<PLibrary>
 
         if (!dependencies.isEmpty()) {
             for (Class<? extends Module> dependency : dependencies) {
-                Module depend = loadedModules.values().stream().filter(module1 -> module1.getClass().getName().equals(dependencies.getClass().getName())).findFirst().orElse(null);
+                Module depend = null;
+
+                for (List<Module> modules : loadedModules.values()) {
+                    if (modules.stream().anyMatch(singleModule -> singleModule.getClass().equals(dependency))) {
+                        depend = module;
+                        break;
+                    }
+                }
 
                 if (depend == null) {
                     instance.getLogger().warning("Could not get loaded dependency " + dependency.getSimpleName() + ". Maybe it wasn't loaded at all?");
@@ -172,6 +214,7 @@ public class ModuleManager extends Manager<PLibrary>
      */
     public int dependedBy(Class<? extends Module> module)
     {
-        return loadedModules.values().stream().filter(module1 -> module1.getClass().isAnnotationPresent(Dependencies.class)).map(module1 -> module1.getClass().getAnnotation(Dependencies.class)).mapToInt(dependencies -> (int) Arrays.stream(dependencies.value()).filter(depend -> depend.equals(module)).count()).sum();
+
+        return loadedModules.values().stream().mapToInt(modules -> (int) modules.stream().filter(singleModule -> singleModule.getClass().isAnnotationPresent(Dependencies.class)).map(singleModule -> singleModule.getClass().getAnnotation(Dependencies.class)).flatMap(dependencies -> Arrays.stream(dependencies.value())).filter(depend -> depend.getClass().equals(module)).count()).sum();
     }
 }

@@ -11,6 +11,8 @@ import java.util.logging.Level;
 /**
  * Base Module for Modules on a BungeeCord Plugin.
  * @param <T> - plugin main class.
+ *
+ * @see ModuleManager
  */
 public class BaseModule<T extends Plugin> implements Module
 {
@@ -25,12 +27,18 @@ public class BaseModule<T extends Plugin> implements Module
         info = new ModuleInfo(authors, version, name, immutableModule);
     }
 
+    /**
+     * @return module information instance.
+     */
     @Override
     public ModuleInfo getInfo()
     {
         return info;
     }
 
+    /**
+     * Boots the module.
+     */
     @Override
     public void boot()
     {
@@ -48,6 +56,9 @@ public class BaseModule<T extends Plugin> implements Module
         }
     }
 
+    /**
+     * Shuts down module.
+     */
     @Override
     public void shutdown()
     {
@@ -65,6 +76,9 @@ public class BaseModule<T extends Plugin> implements Module
         }
     }
 
+    /**
+     * @return true if enabled, else false.
+     */
     @Override
     public boolean isEnabled()
     {

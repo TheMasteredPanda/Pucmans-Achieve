@@ -3,6 +3,7 @@ package io.pucman.bungee;
 import io.pucman.bungee.command.CommandManager;
 import io.pucman.bungee.def.DebugCommand;
 import io.pucman.bungee.manager.ManagingPlugin;
+import io.pucman.bungee.module.ModuleManager;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.plugin.PluginManager;
@@ -21,7 +22,7 @@ public class PLibrary extends ManagingPlugin
     {
         instance = this;
         this.getPluginManager().registerCommand(this, new DebugCommand());
-        this.load(new CommandManager(this));
+        this.load(new CommandManager(this), new ModuleManager(this));
     }
 
     @Override
