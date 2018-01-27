@@ -34,9 +34,4 @@ public interface Module
      * @return true if the module is enabled, otherwise false.
      */
     boolean isEnabled();
-
-    /**
-     * @return true if the module is loaded, otherwise false.
-     */
-    boolean isLoaded();
 }

@@ -1,4 +1,4 @@
-package io.pucman.bungee.manager.module;
+package io.pucman.bungee.module;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
