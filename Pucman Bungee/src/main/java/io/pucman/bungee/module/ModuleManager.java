@@ -93,8 +93,8 @@ public class ModuleManager extends Manager<PLibrary>
 
 
             try {
-                ConstructorAccessor<? extends Module> accessor = ReflectUtil.getConstructor(entry, ReflectUtil.Type.DECLARED);
-                Module m = accessor.call();
+                ConstructorAccessor<? extends Module> accessor = ReflectUtil.getConstructor(entry, ReflectUtil.Type.DECLARED, Plugin.class);
+                Module m = accessor.call(plugin);
                 loadedModules.get(plugin).add(m);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -214,7 +214,6 @@ public class ModuleManager extends Manager<PLibrary>
      */
     public int dependedBy(Class<? extends Module> module)
     {
-
         return loadedModules.values().stream().mapToInt(modules -> (int) modules.stream().filter(singleModule -> singleModule.getClass().isAnnotationPresent(Dependencies.class)).map(singleModule -> singleModule.getClass().getAnnotation(Dependencies.class)).flatMap(dependencies -> Arrays.stream(dependencies.value())).filter(depend -> depend.getClass().equals(module)).count()).sum();
     }
 }

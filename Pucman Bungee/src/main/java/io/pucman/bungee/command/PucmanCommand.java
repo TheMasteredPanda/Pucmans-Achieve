@@ -87,25 +87,25 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      * The following fields are primarily locale.
      */
     @ConfigPopulate(value = "Plugin.Command.PlayerOnlyCommand", format = true)
-    public String PLAYER_ONLY_COMMAND;
+    private String PLAYER_ONLY_COMMAND;
 
     @ConfigPopulate(value = "Plugin.Command.NoPermission", format = true)
-    public String NO_PERMISSION;
+    private String NO_PERMISSION;
 
     @ConfigPopulate(value = "Plugin.Command.NotEnoughArguments", format = true)
-    public String NOT_ENOUGH_ARGUMENTS;
+    private String NOT_ENOUGH_ARGUMENTS;
 
     @ConfigPopulate(value = "Plugin.Command.IncorrectArgumentInput", format = true)
-    public String INCORRECT_ARGUMENT_INPUT;
+    private String INCORRECT_ARGUMENT_INPUT;
 
     @ConfigPopulate(value = "Plugin.Command.ParentCommandHeader", color = true)
-    public String PARENT_COMMAND_HEADER;
+    private String PARENT_COMMAND_HEADER;
 
     @ConfigPopulate(value = "Plugin.Command.ChildCommandHeader", color = true)
-    public String CHILD_COMMAND_HEADER;
+    private String CHILD_COMMAND_HEADER;
 
     @ConfigPopulate(value = "Plugin.Command.CommandEntry", color = true)
-    public String COMMAND_ENTRY;
+    private String COMMAND_ENTRY;
 
 
     /**

@@ -2,6 +2,7 @@ package io.pucman.bungee.module;
 
 import io.pucman.module.Module;
 import io.pucman.module.ModuleInfo;
+import lombok.Getter;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,7 +18,10 @@ import java.util.logging.Level;
 public class BaseModule<T extends Plugin> implements Module
 {
     private ModuleInfo info;
+
+    @Getter
     private T instance;
+
     private AtomicBoolean enabled = new AtomicBoolean(false);
     private ReentrantLock lock = new ReentrantLock();
 
