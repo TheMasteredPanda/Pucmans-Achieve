@@ -11,12 +11,13 @@ import org.bukkit.scoreboard.ScoreboardManager;
 public class PLibrary extends ManagingPlugin
 {
     private static PLibrary instance;
+    private boolean debug = true;
 
     @Override
     public void onLoad()
     {
         instance = this;
-        this.load(new CommandManager<>(this), new BlockMappingManger(this), new ConversationManager(this));
+        this.load(new CommandManager(this), new BlockMappingManger(this), new ConversationManager(this));
     }
 
     @Override
@@ -50,4 +51,15 @@ public class PLibrary extends ManagingPlugin
     {
         return this.getServer().getScheduler();
     }
+<<<<<<< HEAD
 }
+=======
+
+    public void debug(Object o, String message)
+    {
+        if (debug) {
+            getLogger().info("[" + o + "] " + message);
+        }
+    }
+}
+>>>>>>> master

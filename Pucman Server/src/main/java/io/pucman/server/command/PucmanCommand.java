@@ -1,11 +1,7 @@
 package io.pucman.server.command;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import io.pucman.common.exception.DeveloperException;
-import io.pucman.common.exception.TryUtil;
+import io.pucman.common.generic.GenericUtil;
 import io.pucman.common.math.NumberUtil;
 import io.pucman.server.PLibrary;
 import io.pucman.server.file.ConfigPopulate;
@@ -19,48 +15,29 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 
 /**
  * Wrapper for the bungee Command class. Handles most of the conditions for the benefit
  * that the developer will not have to write them for every parent and child command.
- * it also has the added benefit of handling asynchronous execution of the command
- * definition. Which is useful if the command body can be executed on another thread.
- *
- * Asynchronous states indicate what level of asynchronous execution the command body
- * will undergo. The following the states are explained as follows:
- *
- * 2 - All three methods (this#execute, this#onFailure, and this#onSuccess) are executed
- * asynchronously on the same thread.
- *
- * 1 - The method body, which would reside in this#execute, would be executed asynchronously,
- * but either methods this#onFailure or this#onSuccess, depending on the response give inside the
- * body of the command, will not be executed asynchronously.
- *
- * 0 - All three methods will not be executed asynchronously in any capacity.
- *
- * @see this#execute(CommandSender, LinkedList)
- * @see this#onSuccess(CommandSender, Map, LinkedList)
- * @see this#onFailure(CommandSender, Map, LinkedList)
  *
  * ArgumentField is a class that holds the name of the argument field and it's default value.
  * Argument fields that have their default value assigned to a non-null object will be treated
  * as required argument fields, fields that are required in order for the command to run.
- *
  */
 @NotThreadSafe
-public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExecutor
+public abstract class PucmanCommand<T extends JavaPlugin, T1> implements CommandExecutor
 {
+    private final PLibrary LIB  = PLibrary.get();
+
     /**
      * Instance of the plugin this command belongs to.
      */
-    protected P instance;
+    protected T instance;
 
     /**
      * Parent commands essentially does what it says on the tin. These are commands that consider
@@ -97,13 +74,6 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
     private LinkedList<String> aliases = Lists.newLinkedList();
 
     /**
-     * Instance of the command manager.
-     *
-     * @see CommandManager
-     */
-    private CommandManager manager = PLibrary.get().get(CommandManager.class);
-
-    /**
      * Command description.
      */
     @Getter
@@ -122,11 +92,6 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
     private boolean playerOnlyCommand = false;
 
     /**
-     * Asynchronous state, cannot be null.
-     */
-    private int state;
-
-    /**
      * The following fields are primarily locale.
      */
     @ConfigPopulate("NoPermission")
@@ -142,7 +107,7 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
     private String INCORRECT_ARGUMENT_INPUT;
 
     @ConfigPopulate("ParentCommandHeader")
-    public String PARENT_COMMAND_HEADER;
+    private String PARENT_COMMAND_HEADER;
 
     @ConfigPopulate("ChildCommandHeader")
     private String CHILD_COMMAND_HEADER;
@@ -158,29 +123,27 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
      *                   command to not have a permission.
      * @param description - the description of this command.
      * @param playerOnlyCommand - whether this is a command only executable via a player instance.
-     * @param state - the asynchronous state of this command, described above.
      * @param aliases - the aliases of this command.
      */
-    public PucmanCommand(P instance, Locale locale, String name, String description, String permission, boolean playerOnlyCommand, int state, String... aliases)
+    public PucmanCommand(T instance, Locale locale, String name, String description, String permission, boolean playerOnlyCommand, String... aliases)
     {
         this.instance = instance;
         locale.populate(this.getClass());
         this.description = description;
         this.permission = permission;
         this.playerOnlyCommand = playerOnlyCommand;
-        this.state = state;
         this.aliases.add(name);
         this.aliases.addAll(Arrays.asList(aliases));
     }
 
-    public PucmanCommand(P instance, Locale locale, String name, String description, boolean playerOnlyCommand, int state, String... aliases)
+    public PucmanCommand(T instance, Locale locale, String name, String description, boolean playerOnlyCommand, String... aliases)
     {
-        this(instance, locale, name, description, null, playerOnlyCommand, state, aliases);
+        this(instance, locale, name, description, null, playerOnlyCommand, aliases);
     }
 
-    public PucmanCommand(P instance, Locale locale, String name, String description, int state)
+    public PucmanCommand(T instance, Locale locale, String name, String description)
     {
-        this(instance, locale, name, description, null, false, state);
+        this(instance, locale, name, description, null, false);
     }
 
     public String getMainAlias()
@@ -233,15 +196,11 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
      */
     public void addParentCommand(PucmanCommand... commands)
     {
-        try {
-            for (PucmanCommand parent : commands) {
-                if (!this.isParentCommand(parent) && !this.isChildCommand(parent) && parent != null) {
-                    this.parentCommands.add(parent);
-                    parent.addChildCommand(this);
-                }
+        for (PucmanCommand parent : commands) {
+            if (!isParentCommand(parent) && !isChildCommand(parent) && parent != null) {
+                parentCommands.add(parent);
+                parent.addChildCommand(this);
             }
-        } finally {
-
         }
     }
 
@@ -251,8 +210,8 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
      */
     public void arguments(ArgumentField... fields)
     {
-        this.requiredArgumentFields = Lists.newLinkedList();
-        this.argumentFields = Lists.newLinkedList();
+        requiredArgumentFields = Lists.newLinkedList();
+        argumentFields = Lists.newLinkedList();
 
         for (ArgumentField field : fields) {
             if (this.isRequiredArgumentField(field)) {
@@ -303,7 +262,7 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
     /**
      * Generates the command usage. This takes the command path and adds all argument fields to the
      * command. For example:
-     * /parentcommand thiscommand <argument1> [argument2] [argument3]
+     * /parent command this command <argument1> [argument2] [argument3]
      * @return the command usage;
      */
     public String getCommandUsage()
@@ -327,111 +286,85 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
     @Override
     public final boolean onCommand(CommandSender sender, Command command, String s, String[] args)
     {
-        if (!this.isAlias(args[0])) {
+        if (isPlayerOnlyCommand() && !(sender instanceof Player)) {
+            LIB.debug(this, "Is player only command.");
+            Sender.send(sender, PLAYER_ONLY_COMMAND);
             return false;
         }
 
-        if (this.isPlayerOnlyCommand() && !(sender instanceof Player)) {
-            Sender.send(sender, this.PLAYER_ONLY_COMMAND);
+        if (!hasPermission(sender)) {
+            LIB.debug(this, "No permission.");
+            Sender.send(sender, NO_PERMISSION);
             return false;
         }
 
-        if (!this.hasPermission(sender)) {
-            Sender.send(sender, this.NO_PERMISSION);
-            return false;
-        }
-
-        if (args.length > 1) {
+        if (args.length >= 1) {
+            LIB.debug(this, "Argument length is bigger or equal to 1.");
             if (args[0].equalsIgnoreCase("help")) {
+                LIB.debug(this, "First argument is 'help'");
                 LinkedList<String> content = Lists.newLinkedList();
-                content.add(this.PARENT_COMMAND_HEADER.replace("{commandusage}", this.getCommandUsage()).replace("{commanddescrption}", this.getDescription()));
 
-                if (this.childCommands.size() > 0) {
-                    content.add(this.CHILD_COMMAND_HEADER);
+                if (PARENT_COMMAND_HEADER == null) {
+                    LIB.debug(this, "PARENT_COMMAND_HEADER is null.");
+                }
 
-                    for (PucmanCommand child : this.childCommands) {
-                        content.add(this.COMMAND_ENTRY.replace("{commandusage}", child.getCommandPath()).replace("{commanddescription}", child.getDescription()));
+                content.add(PARENT_COMMAND_HEADER.replace("{commandusage}",
+                        getCommandUsage()).replace("{commanddescription}",
+                        getDescription()));
+
+                if (childCommands.size() > 0) {
+                    LIB.debug(this, "Invoked command has child commands.");
+                    content.add(CHILD_COMMAND_HEADER);
+
+                    for (PucmanCommand child : childCommands) {
+                        content.add(COMMAND_ENTRY.replace("{commandusage}", child.getCommandPath()).replace("{commanddescription}", child.getDescription()));
                     }
                 }
 
+                LIB.debug(this, "Paginating.");
                 LinkedHashMap<Integer, String> pages = Format.paginate(content, null, null, 5);
 
                 if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
+                    LIB.debug(this, "2 argument was found and parsable as an integer.");
                     Sender.send(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
                 } else {
+                    LIB.debug(this, "No second argument found, printing first page.");
                     Sender.send(sender, pages.get(1));
                 }
-
                 return false;
             }
 
-            for (PucmanCommand child : this.parentCommands) {
-                if (!child.isAlias(args[0])) {
-                    continue;
-                }
-
-                LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
-                newArgs.remove(args[0]);
-                child.execute(sender, newArgs);
-                return false;
-            }
-
-            if (args.length - 1 < this.getRequiredArgumentFields().size()) {
-                Sender.send(sender, this.NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", this.getCommandUsage()));
-                return false;
-            }
-
-            LinkedList<String> newArgs = Lists.newLinkedList();
-            newArgs.remove(args[0]);
-
-            switch (this.state) {
-                case 0: {
-                    CommandResponse response = this.execute(sender, newArgs);
-
-                    if (response.getType() == CommandResponse.Type.SUCCESS) {
-                        this.onSuccess(response.getSender(), response.getData(), response.getArguments());
-                    } else {
-                        this.onFailure(response.getSender(), response.getData(), response.getArguments());
+            LIB.debug(this, "Checking if the second argument is a child command.");
+            if (childCommands.size() > 0) {
+                for (PucmanCommand child : childCommands) {
+                    if (!child.isAlias(args[0])) {
+                        LIB.debug(this, child.getMainAlias() + " is not the second argument.");
+                        continue;
                     }
-                    break;
-                }
 
-                case 1: {
-                    ListenableFuture<CommandResponse> future = this.manager.getService().submit(() -> this.execute(sender, newArgs));
-                    CommandResponse response = TryUtil.sneaky(future::get, CommandResponse.class);
-
-                    if (response.getType() == CommandResponse.Type.SUCCESS) {
-                        this.onSuccess(response.getSender(), response.getData(), response.getArguments());
-                    } else {
-                        this.onFailure(response.getSender(), response.getData(), response.getArguments());
-                    }
-                }
-
-                case 2: {
-                    ListenableFuture<CommandResponse> future = this.manager.getService().submit(() -> this.execute(sender, newArgs));
-                    Futures.addCallback(future, new FutureCallback<CommandResponse>()
-                    {
-                        @Override
-                        public void onSuccess(@Nullable CommandResponse response)
-                        {
-                            if (response.getType() == CommandResponse.Type.SUCCESS) {
-                                PucmanCommand.this.onSuccess(response.getSender(), response.getData(), response.getArguments());
-                            } else {
-                                PucmanCommand.this.onFailure(response.getSender(), response.getData(), response.getArguments());
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable throwable)
-                        {
-                            throw new DeveloperException(throwable);
-                        }
-                    });
+                    LIB.debug(this, child.getMainAlias() + " is the second argument.");
+                    LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
+                    newArgs.remove(args[0]);
+                    LIB.debug(this, "Invoking constructor of command " + child.getMainAlias() + ".");
+                    child.execute(sender, newArgs);
+                    return false;
                 }
             }
-
-            //TODO look into a proper way to do this.
+        } else {
+            LIB.debug(this, "There are no arguments.");
         }
+
+        if (getRequiredArgumentFields().size() > args.length) {
+            LIB.debug(this, "Required arguments not found.");
+            Sender.send(sender, NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", getCommandUsage()));
+            return false;
+        }
+
+        LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
+
+        LIB.debug(this, "Invoking main command body.");
+        execute(GenericUtil.cast(sender), newArgs);
+
         return true;
     }
 
@@ -440,23 +373,5 @@ public abstract class PucmanCommand<P extends JavaPlugin> implements CommandExec
      * @param sender - the sender of the command.
      * @param parameters - the parameters.
      */
-    public abstract CommandResponse execute(CommandSender sender, LinkedList<String> parameters);
-
-    /**
-     * If the commands body returns a failed command response, this part of the command
-     * body will be invoked.
-     * @param sender - the seconder of the command
-     * @param parameters - the parameters.
-     */
-    public void onSuccess(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters) {
-    }
-
-    /**
-     * If the commands body returns a successful command response, this part of the command
-     * body will be invoked.
-     * @param sender - the sender of the command.
-     * @param parameters - the parameters.
-     */
-    public void onFailure(CommandSender sender, Map<String, Object> data, LinkedList<String> parameters) {
-    }
+    public abstract void execute(T1 sender, LinkedList<String> parameters);
 }
