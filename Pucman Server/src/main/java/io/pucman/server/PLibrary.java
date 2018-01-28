@@ -51,9 +51,6 @@ public class PLibrary extends ManagingPlugin
     {
         return this.getServer().getScheduler();
     }
-<<<<<<< HEAD
-}
-=======
 
     public void debug(Object o, String message)
     {
@@ -62,4 +59,3 @@ public class PLibrary extends ManagingPlugin
         }
     }
 }
->>>>>>> master
