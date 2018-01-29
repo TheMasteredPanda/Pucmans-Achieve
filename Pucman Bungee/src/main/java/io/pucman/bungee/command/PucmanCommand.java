@@ -18,6 +18,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -78,6 +79,12 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
     private String description;
 
     /**
+     * List of permissions. If a player has one of these permission nodes they can use this command.
+     */
+    @Getter
+    private List<String> permissionNodes;
+
+    /**
      * If true, it is a player only command, otherwise both the console and player can execute it.
      */
     @Getter
@@ -120,15 +127,15 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
      * Main constructor to this wrapper, contains all the necessary information.
      * @param instance - instance of the plugin the command belongs to.
      * @param name - the 'main alias' of this command.
-     * @param permission - the permission node of this command, if this is set to null the wrapper will consider this
-     *                   command to not have a permission.
+     * @param permissionNodes - the permission nodes of this command, if this is set to null the wrapper will consider this
+     *                   command to not have any permissions.
      * @param description - the description of this command.
      * @param playerOnlyCommand - whether this is a command only executable via a player instance.
      * @param aliases - the aliases of this command.
      */
-    public PucmanCommand(@NonNull T instance, @NonNull Locale locale, @NonNull String name, String permission, String description, boolean playerOnlyCommand, String... aliases)
+    public PucmanCommand(@NonNull T instance, @NonNull Locale locale, @NonNull String name, String permissionNodes, String description, boolean playerOnlyCommand, String... aliases)
     {
-        super(name, permission, aliases);
+        super(name, null, aliases);
 
         this.instance = instance;
         LIB.debug(this, "Populating mandatory messages.");
@@ -136,7 +143,9 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
         locale.populate(this);
         LIB.debug(this, "Populated mandatory messages.");
 
-
+        if (permissionNodes != null) {
+            this.permissionNodes = Arrays.asList(permissionNodes.split("|"));
+        }
 
         if (description != null) {
             this.description = description;

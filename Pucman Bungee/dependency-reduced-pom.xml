@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>pucman-bungee</artifactId>
-  <version>1.3.1.037</version>
+  <version>1.3.1.040</version>
   <build>
     <plugins>
       <plugin>

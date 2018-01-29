@@ -9,7 +9,7 @@ import java.lang.ref.SoftReference;
  */
 public class PlayerWrapper
 {
-    private SoftReference<ProxiedPlayer> player;
+    protected SoftReference<ProxiedPlayer> player;
 
     public PlayerWrapper(ProxiedPlayer player)
     {
