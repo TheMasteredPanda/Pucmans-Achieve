@@ -57,7 +57,7 @@ public class ManagingPlugin extends Plugin
 
         if (managerInstance == null) {
             System.out.println("m is null, tried to get " + manager.getName() + " manager. Currency size of loaded managers list is: " + String.valueOf(this.managers.size()));
-            throw new DeveloperException("m is null.");
+            throw new DeveloperException("m (manager) is null.");
         }
 
         return GenericUtil.cast(managerInstance);

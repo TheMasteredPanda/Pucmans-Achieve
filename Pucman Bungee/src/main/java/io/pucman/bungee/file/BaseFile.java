@@ -111,7 +111,7 @@ public class BaseFile
 
             f.setAccessible(true);
 
-            if (!GenericUtil.caseable(value, f.getType())) {
+            if (!GenericUtil.castable(value, f.getType())) {
                 this.lib.debug(this, "Can't cast field type " + f.getName() + " do the value in the config.");
                 throw new DeveloperException("Value corresponding to key " + annotation.value() + " could not be assigned to field " + f.getName() + " as it's type, " + f.getType().getName() + " could not be casted to the value " + value.toString() + ".");
             }

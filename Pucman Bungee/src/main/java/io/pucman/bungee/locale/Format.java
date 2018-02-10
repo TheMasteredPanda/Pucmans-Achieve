@@ -39,7 +39,7 @@ public final class Format
      */
     public static String format(String message, Object... objects) {
         for (int i = 0; i < objects.length; i++) {
-            message = message.replace("{" + String.valueOf(i) + "]", objects[i].toString());
+            message = message.replace("{" + i + "]", objects[i].toString());
         }
 
         return message;

@@ -71,15 +71,15 @@ public class Locale<P extends Plugin> extends BaseFile
     @Override @SneakyThrows
     public synchronized void load()
     {
-        if (!this.getInstance().getDataFolder().exists()) {
-            this.lib.debug(this, "Creating parent directory.");
-            this.getInstance().getDataFolder().mkdir();
+        if (!getInstance().getDataFolder().exists()) {
+            lib.debug(this, "Creating parent directory.");
+            getInstance().getDataFolder().mkdir();
         }
 
-        if (this.getInstance().getResourceAsStream(this.getName()) != null && !this.getFile().exists()) {
-            this.lib.debug(this, "File " + this.getName() + " not found, creating one.");
-            InputStream is = this.getInstance().getResourceAsStream(this.getName());
-            OutputStream os = new FileOutputStream(this.getFile());
+        if (getInstance().getResourceAsStream(getName()) != null && !getFile().exists()) {
+            lib.debug(this, "File " + getName() + " not found, creating one.");
+            InputStream is = getInstance().getResourceAsStream(getName());
+            OutputStream os = new FileOutputStream(getFile());
 
             byte[] buffer = new byte[1024];
             int read;
@@ -92,16 +92,16 @@ public class Locale<P extends Plugin> extends BaseFile
             os.close();
         }
 
-        if (this.configuration == null) {
-            PLibrary.get().debug(this, "Loading file: " + this.getFile() + " as a configuration file.");
-            this.configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.getFile());
+        if (configuration == null) {
+            PLibrary.get().debug(this, "Loading file: " + getFile() + " as a configuration file.");
+            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(getFile());
         }
 
-        this.PLUGIN_PREFIX = this.getMessage("Plugin.Prefix");
-        this.PLUGIN_MESSAGE_FORMAT = this.getMessage("Plugin.PluginMessageFormat");
-        this.LIST_HEADER_FORMAT = this.getMessage("Plugin.ListHeaderFormat");
-        this.LIST_FOOTER_FORMAT = this.getMessage("Plugin.ListFooterFormat");
-        this.PAGE_INDEX_FORMAT = this.getMessage("Plugin.PageIndexFormat");
+        PLUGIN_PREFIX = getMessage("Plugin.Prefix");
+        PLUGIN_MESSAGE_FORMAT = getMessage("Plugin.PluginMessageFormat");
+        LIST_HEADER_FORMAT = getMessage("Plugin.ListHeaderFormat");
+        LIST_FOOTER_FORMAT = getMessage("Plugin.ListFooterFormat");
+        PAGE_INDEX_FORMAT = getMessage("Plugin.PageIndexFormat");
     }
 
     /**
@@ -112,7 +112,7 @@ public class Locale<P extends Plugin> extends BaseFile
     public <V extends Object> void populate(V instance)
     {
         Class clazz = instance.getClass();
-        this.lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
+        lib.debug(this, "Attempting to populate class " + clazz.getName() + ".");
 
 
         List<Field> fieldList = Lists.newArrayList(clazz.getDeclaredFields());
@@ -121,44 +121,44 @@ public class Locale<P extends Plugin> extends BaseFile
         lib.debug(this, "List of fields in " + clazz.getName() + ": " + fieldList);
 
         for (Field f : fieldList) {
-            this.lib.debug(this, "Iteration landed at " + f.getName() + ".");
+            lib.debug(this, "Iteration landed at " + f.getName() + ".");
 
             if (!f.isAnnotationPresent(ConfigPopulate.class)) {
-                this.lib.debug(this, f.getName() + " does not have the correct annotation.");
+                lib.debug(this, f.getName() + " does not have the correct annotation.");
                 continue;
             }
 
-            this.lib.debug(this, f.getName() + " does have the correct annotation.");
+            lib.debug(this, f.getName() + " does have the correct annotation.");
             f.setAccessible(true);
 
             ConfigPopulate annotation = f.getAnnotation(ConfigPopulate.class);
 
-            Object value = this.getConfiguration().getString(annotation.value(), null);
+            Object value = getConfiguration().getString(annotation.value(), null);
 
             if (value == null) {
-                this.lib.debug(this, "Value is null in annotation over " + f.getName() + ".");
-                throw new DeveloperException("Key " + annotation.value() + ". Was not found in file " + this.getName() + ".");
+                lib.debug(this, "Value is null in annotation over " + f.getName() + ".");
+                throw new DeveloperException("Key " + annotation.value() + ". Was not found in file " + getName() + ".");
             }
 
-            if (!GenericUtil.caseable(value, f.getType())) {
-                this.lib.debug(this, "Can't cast field type " + f.getName() + " do the value in the config.");
+            if (!GenericUtil.castable(value, f.getType())) {
+                lib.debug(this, "Can't cast field type " + f.getName() + " do the value in the config.");
                 throw new DeveloperException("Value corresponding to key " + annotation.value() + " could not be assigned to field " + f.getName() + " as it's type, " + f.getType().getName() + " could not be casted to the value " + value.toString() + ".");
             }
 
             if (f.get(instance) == null) {
                 if (f.getType().equals(String.class) && annotation.format()) {
-                    this.lib.debug(this, "Setting the value as a String, formatted, to field " + f.getName() + ". Type of field: " + f.getType().getName() + ".");
-                    f.set(instance, GenericUtil.cast(Format.color(this.PLUGIN_MESSAGE_FORMAT.replace("{prefix}", this.PLUGIN_PREFIX).replace("{message}", value.toString()))));
+                    lib.debug(this, "Setting the value as a String, formatted, to field " + f.getName() + ". Type of field: " + f.getType().getName() + ".");
+                    f.set(instance, GenericUtil.cast(Format.color(PLUGIN_MESSAGE_FORMAT.replace("{prefix}", PLUGIN_PREFIX).replace("{message}", value.toString()))));
                     continue;
                 }
 
                 if (f.getType().equals(String.class) && annotation.color()) {
-                    this.lib.debug(this, "Setting the value as a string, colored, to field " + f.getName() + ".");
+                    lib.debug(this, "Setting the value as a string, colored, to field " + f.getName() + ".");
                     f.set(instance, Format.color(value.toString()));
                     continue;
                 }
 
-                this.lib.debug(this, "Setting field " + f.getName() + ".");
+                lib.debug(this, "Setting field " + f.getName() + ".");
                 TryUtil.sneaky(() -> f.set(instance, value));
             }
         }
@@ -171,16 +171,16 @@ public class Locale<P extends Plugin> extends BaseFile
      */
     public String getMessage(String path)
     {
-        return this.getConfiguration().getString(path);
+        return getConfiguration().getString(path);
     }
 
     public LinkedList<String> getHeader()
     {
-        return Lists.newLinkedList(Arrays.asList(this.LIST_HEADER_FORMAT.split("\n")));
+        return Lists.newLinkedList(Arrays.asList(LIST_HEADER_FORMAT.split("\n")));
     }
 
     public LinkedList<String> getFooter()
     {
-        return Lists.newLinkedList(Arrays.asList(this.LIST_FOOTER_FORMAT.split("\n")));
+        return Lists.newLinkedList(Arrays.asList(LIST_FOOTER_FORMAT.split("\n")));
     }
 }

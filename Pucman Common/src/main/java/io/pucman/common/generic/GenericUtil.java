@@ -27,7 +27,7 @@ public final class GenericUtil
         return false;
     }
 
-    public static <T> boolean caseable(Object o, Class<T> clazz)
+    public static <T> boolean castable(Object o, Class<T> clazz)
     {
         try {
             T t = (T) o;

@@ -20,7 +20,7 @@ public class ConstructorAccessor<T>
     public ConstructorAccessor(Constructor<T> constructor)
     {
         this.constructor = constructor;
-        this.constructor.setAccessible(true);
+        constructor.setAccessible(true);
     }
 
     /**
@@ -31,7 +31,7 @@ public class ConstructorAccessor<T>
     @SneakyThrows
     public T call(Object... parameters)
     {
-        return GenericUtil.cast(this.constructor.newInstance(parameters));
+        return GenericUtil.cast(constructor.newInstance(parameters));
     }
 
     /**
@@ -84,7 +84,7 @@ public class ConstructorAccessor<T>
      */
     private Annotation getAnnotation(Class<? extends Annotation> annotation, ReflectUtil.Type annotationType)
     {
-        return annotationType == ReflectUtil.Type.PUBLIC ? this.constructor.getAnnotation(annotation) : this.constructor.getDeclaredAnnotation(annotation);
+        return annotationType == ReflectUtil.Type.PUBLIC ? constructor.getAnnotation(annotation) : constructor.getDeclaredAnnotation(annotation);
     }
 
     /**
@@ -92,6 +92,6 @@ public class ConstructorAccessor<T>
      */
     public Constructor<T> get()
     {
-        return this.constructor;
+        return constructor;
     }
 }

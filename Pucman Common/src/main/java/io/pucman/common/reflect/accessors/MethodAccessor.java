@@ -20,7 +20,7 @@ public class MethodAccessor<T>
     public MethodAccessor(Method method)
     {
         this.method = method;
-        this.method.setAccessible(true);
+        method.setAccessible(true);
     }
 
     /**
@@ -32,7 +32,7 @@ public class MethodAccessor<T>
     @SneakyThrows
     public T call(Object instance, Object... parameters)
     {
-        return GenericUtil.cast(this.method.invoke(instance, parameters));
+        return GenericUtil.cast(method.invoke(instance, parameters));
     }
 
     /**
@@ -40,7 +40,7 @@ public class MethodAccessor<T>
      */
     public Annotation[] getPublicAnnotations()
     {
-        return this.method.getAnnotations();
+        return method.getAnnotations();
     }
 
     /**
@@ -48,7 +48,7 @@ public class MethodAccessor<T>
      */
     public Annotation[] getPrivateAnnotations()
     {
-        return this.method.getDeclaredAnnotations();
+        return method.getDeclaredAnnotations();
     }
 
     /**
@@ -58,7 +58,7 @@ public class MethodAccessor<T>
      */
     public boolean hasAnnotation(Class<? extends Annotation> annotation)
     {
-        return this.method.isAnnotationPresent(annotation);
+        return method.isAnnotationPresent(annotation);
     }
 
     /**
@@ -68,12 +68,12 @@ public class MethodAccessor<T>
      */
     public Object getAnnotation(Class<? extends Annotation> annotation, ReflectUtil.Type annotationType)
     {
-        return annotationType == ReflectUtil.Type.PUBLIC ? this.method.getAnnotation(annotation) : this.method.getDeclaredAnnotation(annotation);
+        return annotationType == ReflectUtil.Type.PUBLIC ? method.getAnnotation(annotation) : method.getDeclaredAnnotation(annotation);
     }
 
     public Annotation[][] getAnnotatedParameters()
     {
-        return this.method.getParameterAnnotations();
+        return method.getParameterAnnotations();
     }
 
     /**
@@ -81,7 +81,7 @@ public class MethodAccessor<T>
      */
     public Parameter[] getParameters()
     {
-        return this.method.getParameters();
+        return method.getParameters();
     }
 
     /**
@@ -89,7 +89,7 @@ public class MethodAccessor<T>
      */
     public String getName()
     {
-        return this.method.getName();
+        return method.getName();
     }
 
     /**
@@ -97,6 +97,6 @@ public class MethodAccessor<T>
      */
     public Method get()
     {
-        return this.method;
+        return method;
     }
 }

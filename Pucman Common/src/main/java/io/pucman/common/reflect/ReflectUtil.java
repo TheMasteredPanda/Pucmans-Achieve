@@ -25,7 +25,7 @@ public final class ReflectUtil
      * process of creating a new instance of the same object
      * when manipulating it.
      */
-    private static final LoadingCache<String, Object> REFLECT_CACHE = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(5, TimeUnit.MINUTES).build(new ReflectCacheLoader<>());
+    private static final LoadingCache<String, Object> REFLECT_CACHE = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build(new ReflectCacheLoader<>());
 
     public ReflectUtil()
     {

@@ -17,6 +17,12 @@ public class DebugCommand extends Command
     public void execute(CommandSender sender, String[] arguments)
     {
         PLibrary.get().setDebug(!PLibrary.get().isDebug());
+
+        if (!sender.hasPermission("plibrary.bdebug")) {
+            Sender.send(sender, "You don't have the permission to turn on, or off, debug mode.");
+            return;
+        }
+
         Sender.send(sender, ChatColor.translateAlternateColorCodes('&', "&aSet debug mode to " + PLibrary.get().isDebug() + "."));
     }
 }

@@ -1,13 +1,10 @@
 pucman-parent.iml
 Pucman Bungee/pucman-bungee.iml
 Pucman Bungee/dependency-reduced-pom.xml
-Pucman Bungee/target
 Pucman Common/pucman-common.iml
 Pucman Common/dependency-reduced-pom.xml
-Pucman Common/target
 Pucman Server/pucman-server.iml
 Pucman Server/dependency-reduced-pom.xml
-Pucman Server/target
 Pucman SQL/Pucman SQL.iml
 Pucman SQL/target
 target

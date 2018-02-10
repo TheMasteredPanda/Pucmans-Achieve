@@ -11,8 +11,8 @@
 
     <repositories>
         <repository>
-            <id>personal-central</id>
-            <url>http://rrm.themasteredpanda.com/repository/maven-group/</url>
+            <id>central</id>
+            <url>http://central.maven.org/maven2/</url>
         </repository>
     </repositories>
 
@@ -39,7 +39,7 @@
     <build>
 
         <plugins>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.0</version>
@@ -51,7 +51,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -107,6 +107,13 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.20</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

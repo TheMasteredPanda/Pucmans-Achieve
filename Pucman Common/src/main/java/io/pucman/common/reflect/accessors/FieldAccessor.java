@@ -20,7 +20,7 @@ public class FieldAccessor<T>
     public FieldAccessor(Field field)
     {
         this.field = field;
-        this.field.setAccessible(true);
+        field.setAccessible(true);
     }
 
     /**
@@ -31,7 +31,7 @@ public class FieldAccessor<T>
     @SneakyThrows
     public T get(Object instance)
     {
-        return GenericUtil.cast(this.field.get(instance));
+        return GenericUtil.cast(field.get(instance));
     }
 
     /**
@@ -42,7 +42,7 @@ public class FieldAccessor<T>
     @SneakyThrows
     public void set(Object instance, T value)
     {
-        this.field.set(instance, value);
+        field.set(instance, value);
     }
 
     /**
@@ -50,7 +50,7 @@ public class FieldAccessor<T>
      */
     public Annotation[] getPublicAnnotations()
     {
-        return this.field.getAnnotations();
+        return field.getAnnotations();
     }
 
     /**
@@ -58,7 +58,7 @@ public class FieldAccessor<T>
      */
     public Annotation[] getPrivateAnnotations()
     {
-        return this.field.getDeclaredAnnotations();
+        return field.getDeclaredAnnotations();
     }
 
     /**
@@ -68,7 +68,7 @@ public class FieldAccessor<T>
      */
     public boolean hasAnnotation(Class<? extends Annotation> annotation)
     {
-        return this.field.isAnnotationPresent(annotation);
+        return field.isAnnotationPresent(annotation);
     }
 
     /**
@@ -78,7 +78,7 @@ public class FieldAccessor<T>
      */
     public Annotation getAnnotation(Class<? extends Annotation> annotation, ReflectUtil.Type annotationType)
     {
-        return annotationType == ReflectUtil.Type.PUBLIC ? this.field.getAnnotation(annotation) : this.field.getDeclaredAnnotation(annotation);
+        return annotationType == ReflectUtil.Type.PUBLIC ? field.getAnnotation(annotation) : field.getDeclaredAnnotation(annotation);
     }
 
     /**
@@ -86,7 +86,7 @@ public class FieldAccessor<T>
      */
     public Class<?> getType()
     {
-        return this.field.getType();
+        return field.getType();
     }
 
     /**
@@ -94,7 +94,7 @@ public class FieldAccessor<T>
      */
     public Field get()
     {
-        return this.field;
+        return field;
     }
 
     /**
@@ -102,6 +102,6 @@ public class FieldAccessor<T>
      */
     public String getName()
     {
-        return this.field.getName();
+        return field.getName();
     }
 }
