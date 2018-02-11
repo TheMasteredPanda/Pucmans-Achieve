@@ -39,7 +39,7 @@ public class BaseFile
     public BaseFile(Plugin instance, String name, File parent, Class<? extends ConfigurationProvider> provider)
     {
         this.instance = instance;
-        name = name;
+        this.name = name;
         file = new File(parent, name);
         this.provider = provider;
     }
@@ -73,7 +73,7 @@ public class BaseFile
         }
 
         if (configuration == null) {
-            PLibrary.get().debug(this, "Loading file: " + getFile() + " as a configuration file.");
+            lib.debug(this, "Loading file: " + getFile() + " as a configuration file.");
             configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(getFile());
         }
     }

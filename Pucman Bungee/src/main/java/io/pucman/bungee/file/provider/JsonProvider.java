@@ -17,67 +17,67 @@ import java.util.Map;
  */
 public class JsonProvider extends ConfigurationProvider
 {
-    private final ConstructorAccessor<Configuration> MAP_CONFIURATION_CONSTRUCTOR = ReflectUtil.getConstructor(Configuration.class, ReflectUtil.Type.DECLARED, Map.class, Configuration.class);
+    private final ConstructorAccessor<Configuration> MAP_CONFIGURATION_CONSTRUCTOR = ReflectUtil.getConstructor(Configuration.class, ReflectUtil.Type.DECLARED, Map.class, Configuration.class);
     private final FieldAccessor<Map<String, Object>> CONFIGURATION_SELF_FIELD = ReflectUtil.getField(Configuration.class, "self", ReflectUtil.Type.DECLARED);
     private final Gson gson = new Gson();
     @Override
     public void save(Configuration configuration, File file) throws IOException
     {
-        this.save(configuration, new FileWriter(file));
+        save(configuration, new FileWriter(file));
     }
 
     @Override
     public void save(Configuration configuration, Writer writer)
     {
-        gson.toJson(gson.toJson(this.CONFIGURATION_SELF_FIELD.get(configuration)), writer);
+        gson.toJson(gson.toJson(CONFIGURATION_SELF_FIELD.get(configuration)), writer);
         TryUtil.sneaky(writer::close);
     }
 
     @Override
     public Configuration load(File file) throws IOException
     {
-        return this.load(file, null);
+        return load(file, null);
     }
 
     @Override
     public Configuration load(File file, Configuration configuration) throws IOException
     {
-        return this.load(new FileReader(file), configuration);
+        return load(new FileReader(file), configuration);
     }
 
     @Override
     public Configuration load(Reader reader)
     {
-        return this.load(reader, null);
+        return load(reader, null);
     }
 
     @Override
     public Configuration load(Reader reader, Configuration configuration)
     {
-        return this.MAP_CONFIURATION_CONSTRUCTOR.call(gson.fromJson(reader, Map.class), configuration);
+        return MAP_CONFIGURATION_CONSTRUCTOR.call(gson.fromJson(reader, Map.class), configuration);
     }
 
     @Override
     public Configuration load(InputStream inputStream)
     {
-        return this.load(inputStream, null);
+        return load(inputStream, null);
     }
 
     @Override
     public Configuration load(InputStream inputStream, Configuration configuration)
     {
-        return this.MAP_CONFIURATION_CONSTRUCTOR.call(gson.fromJson(new InputStreamReader(inputStream), Map.class), configuration);
+        return MAP_CONFIGURATION_CONSTRUCTOR.call(gson.fromJson(new InputStreamReader(inputStream), Map.class), configuration);
     }
 
     @Override
     public Configuration load(String s)
     {
-        return this.load(s, null);
+        return load(s, null);
     }
 
     @Override
     public Configuration load(String s, Configuration configuration)
     {
-        return this.MAP_CONFIURATION_CONSTRUCTOR.call(gson.fromJson(s, Map.class), configuration);
+        return MAP_CONFIGURATION_CONSTRUCTOR.call(gson.fromJson(s, Map.class), configuration);
     }
 }

@@ -21,4 +21,12 @@ public class CommandManager extends Manager<PLibrary>
         super(instance, Priority.HIGH);
         service = Executors.newFixedThreadPool(instance.getMainConfig().get(Integer.class, "Command.ThreadPoolSize"));
     }
+
+    public void register(PucmanCommand... commands)
+    {
+        for (PucmanCommand command : commands) {
+            instance.getPluginManager().registerCommand(instance, command);
+            instance.getLogger().info("Registered command " + command.getCommandPath() + ".");
+        }
+    }
 }

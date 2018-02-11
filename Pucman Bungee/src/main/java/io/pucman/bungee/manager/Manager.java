@@ -28,9 +28,9 @@ public class Manager<P extends ManagingPlugin>
      */
     protected void init()
     {
-        if (!this.enable.get()) {
-            this.onEnable();
-            this.enable.set(true);
+        if (!enable.get()) {
+            onEnable();
+            enable.set(true);
         }
     }
 
@@ -39,15 +39,15 @@ public class Manager<P extends ManagingPlugin>
      */
     public void shutdown()
     {
-        if (this.enable.get()) {
-            this.onDisable();
-            this.enable.set(false);
+        if (enable.get()) {
+            onDisable();
+            enable.set(false);
         }
     }
 
     public boolean isEnabled()
     {
-        return this.enable.get();
+        return enable.get();
     }
 
     public void onEnable()
