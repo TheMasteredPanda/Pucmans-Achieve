@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/**
- * @see PucmanCommand
- */
+
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Getter
+/**
+ * Template class. Used to specify one argument for a pucman command.
+ */
 public class ArgumentField
 {
     private final String name;

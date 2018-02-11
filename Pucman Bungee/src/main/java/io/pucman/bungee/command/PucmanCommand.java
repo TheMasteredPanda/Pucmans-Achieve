@@ -1,269 +1,201 @@
 package io.pucman.bungee.command;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.file.ConfigPopulate;
 import io.pucman.bungee.locale.Format;
-import io.pucman.bungee.locale.Locale;
+import io.pucman.bungee.plugin.LibPlugin;
 import io.pucman.bungee.sender.Sender;
 import io.pucman.common.generic.GenericUtil;
 import io.pucman.common.math.NumberUtil;
 import lombok.Getter;
-import lombok.NonNull;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
-import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Wrapper for the bungee Command class. Handles most of the conditions for the benefit
- * that the developer will not have to write them for every parent and child command.
+ * Command wrapper. A wrapper to handle the repetitive yet necessary
+ * tasks of most, if not all, commands. This will execute the command
+ * body asynchronously.
  *
- * @see this#execute(T1, LinkedList)
+ * This had the added ability of the differentiation of required arguments
+ * and optional arguments. Required arguments must be fulfilled whereas
+ * optional arguments don't need to, but can.
  *
- * ArgumentField is a class that holds the name of the argument field and it's default value.
- * Argument fields that have their default value assigned to a non-null object will be treated
- * as required argument fields, fields that are required in order for the command to run.
- *
+ * @param <T> - command sender.
+ * @param <T1> - plugin this command belongs to.
  */
-//TODO asynchronously.
-public abstract class PucmanCommand<T extends Plugin, T1> extends Command
+public abstract class PucmanCommand<T, T1 extends LibPlugin> extends Command
 {
-    /**
-     * Instance of the main library class.
-     */
-    private final PLibrary LIB = PLibrary.get();
+    @ConfigPopulate(value = "Library.Command.PlayerOnlyCommand", format = true)
+    private String PLAYER_ONLY_COMMAND;
 
-    /**
-     * Instance of the plugin passed in the constructors.
-     */
-    protected T instance;
+    @ConfigPopulate(value = "Library.Command.IncorrectArgumentDataType", format = true)
+    private String INCORRECT_ARGUMENT_DATA_TYPE;
 
-    /**
-     * Parent commands essentially does what it says on the tin. These are commands that consider
-     * this command to be a child command, and vise versa. A parent command cannot also be a child
-     * command of the same instance, and a child command cannot also be a parent command of the instance.
-     */
-    @Getter
-    private LinkedList<PucmanCommand> parentCommands = Lists.newLinkedList();
+    @ConfigPopulate(value = "Library.Command.NotEnoughArguments", format = true)
+    private String NOT_ENOUGH_ARGUMENTS;
 
-    /**
-     * Child commands consider this instance to be their parent command. Child commands are essentially sub
-     * commands. This command system can chain as many instances of this class as possible.
-     */
-    @Getter
-    private LinkedList<PucmanCommand> childCommands = Lists.newLinkedList();
+    @ConfigPopulate(value = "Library.Command.CommandNotFound", format = true)
+    private String COMMAND_NOT_FOUND;
 
-    /**
-     * A list of all the argument fields for this command.
-     */
-    @Getter
-    private LinkedList<ArgumentField> argumentFields = Lists.newLinkedList();
+    @ConfigPopulate(value = "Library.Command.HelpList.ListEntry", format = true)
+    private String HELP_COMMAND_LIST_ENTRY;
 
-    /**
-     * A list of all the required argument fields for this command.
-     */
-    @Getter
-    private LinkedList<ArgumentField> requiredArgumentFields = Lists.newLinkedList();
+    @ConfigPopulate(value = "Library.Command.HelpCommandNotEnabled", format = true)
+    private String HELP_COMMAND_NOT_ENABLED;
 
-    /**
-     * Command description.
-     */
+    @ConfigPopulate(value = "Library.Command.HelpList.CurrentCommandHeader", color = true)
+    private String HELP_LIST_CURRENT_COMMAND_HEADER;
+
+    @ConfigPopulate(value = "Library.Command.HelpList.ChildCommandHeader", color = true)
+    private String HELP_LIST_CHILD_COMMANDS_HEADER;
+
+    @ConfigPopulate(value = "Library.Command.PlayerNotFound", format = true)
+    private String PLAYER_NOT_FOUND;
+
+    protected T1 instance;
+
+    private CommandManager manager = PLibrary.get().get(CommandManager.class);
+
     @Getter
     private String description;
 
-    /**
-     * List of permissions. If a player has one of these permission nodes they can use this command.
-     */
-    @Getter
-    private List<String> permissionNodes;
-
-    /**
-     * If true, it is a player only command, otherwise both the console and player can execute it.
-     */
     @Getter
     private boolean playerOnlyCommand;
 
-    /**
-     * The following fields are primarily locale.
-     */
-    @ConfigPopulate(value = "Plugin.Command.PlayerOnlyCommand", format = true)
-    private String PLAYER_ONLY_COMMAND;
+    @Getter
+    private LinkedList<PucmanCommand> parentCommands = Lists.newLinkedList();
 
-    @ConfigPopulate(value = "Plugin.Command.NoPermission", format = true)
-    private String NO_PERMISSION;
+    @Getter
+    private LinkedList<PucmanCommand> childCommands = Lists.newLinkedList();
 
-    @ConfigPopulate(value = "Plugin.Command.NotEnoughArguments", format = true)
-    private String NOT_ENOUGH_ARGUMENTS;
+    @Getter
+    private LinkedList<ArgumentField> arguments = Lists.newLinkedList();
 
-    @ConfigPopulate(value = "Plugin.Command.IncorrectArgumentInput", format = true)
-    private String INCORRECT_ARGUMENT_INPUT;
+    @Getter
+    private LinkedList<ArgumentField> requiredArguments = Lists.newLinkedList();
 
-    @ConfigPopulate(value = "Plugin.Command.ParentCommandHeader", color = true)
-    private String PARENT_COMMAND_HEADER;
+    private boolean helpCmd;
 
-    @ConfigPopulate(value = "Plugin.Command.ChildCommandHeader", color = true)
-    private String CHILD_COMMAND_HEADER;
-
-    @ConfigPopulate(value = "Plugin.Command.CommandEntry", color = true)
-    private String COMMAND_ENTRY;
-
-
-    /**
-     * Instance of the command manager.
-     *
-     * @see CommandManager
-     */
-    private CommandManager manager = PLibrary.get().get(CommandManager.class);
-
-
-    /**
-     * Main constructor to this wrapper, contains all the necessary information.
-     * @param instance - instance of the plugin the command belongs to.
-     * @param name - the 'main alias' of this command.
-     * @param permissionNodes - the permission nodes of this command, if this is set to null the wrapper will consider this
-     *                   command to not have any permissions.
-     * @param description - the description of this command.
-     * @param playerOnlyCommand - whether this is a command only executable via a player instance.
-     * @param aliases - the aliases of this command.
-     */
-    public PucmanCommand(@NonNull T instance, @NonNull Locale locale, @NonNull String name, String permissionNodes, String description, boolean playerOnlyCommand, String... aliases)
+    public PucmanCommand(String mainAlias, String permission, String description, boolean playerOnlyCommand, boolean helpCmd, String... aliases)
     {
-        super(name, null, aliases);
-
-        this.instance = instance;
-        LIB.debug(this, "Populating mandatory messages.");
-
-        locale.populate(this);
-        LIB.debug(this, "Populated mandatory messages.");
-
-        if (permissionNodes != null) {
-            this.permissionNodes = Arrays.asList(permissionNodes.split("|"));
-        }
-
-        if (description != null) {
-            this.description = description;
-        }
-
-
+        super(mainAlias, permission, aliases);
+        this.description = description;
         this.playerOnlyCommand = playerOnlyCommand;
-    }
-
-    public PucmanCommand(T instance, Locale locale, String name, String description, boolean playerOnlyCommand)
-    {
-        this(instance, locale, name, null, description, playerOnlyCommand);
-    }
-
-    public PucmanCommand(T instance, Locale locale, String name, String description)
-    {
-        this(instance, locale, name, null, description, false);
+        this.helpCmd = helpCmd;
+        PLibrary.get().getMainConfig().populate(this);
     }
 
     /**
-     * To add argument fields to this command.
-     * @param fields - the argument fields.
+     * Adds the arguments to a command.
+     * @param arguments - arguments.
      */
-    public void arguments(ArgumentField... fields)
+    public void addArguments(ArgumentField... arguments)
     {
-        argumentFields.addAll(Arrays.asList(fields));
-        requiredArgumentFields = argumentFields.stream().filter(ArgumentField::isDef).collect(Collectors.toCollection(Lists::newLinkedList));
+        this.arguments.addAll(Arrays.asList(arguments));
+        requiredArguments = Arrays.stream(arguments).filter(ArgumentField::isDef).collect(Collectors.toCollection(Lists::newLinkedList));
     }
 
     /**
-     * For adding parent commands.
-     * @param commands - commands.
-     */
-    public void addParentCommands(PucmanCommand... commands)
-    {
-        for (PucmanCommand command : commands) {
-            if (!isParentCommand(command) && !isChildCommand(command) && command != null) {
-                parentCommands.add(command);
-                command.addChildCommands(this);
-            }
-        }
-    }
-
-    /**
-     * Checking if a command is a parent command.
-     * @param command - command to check.
-     * @return if if is a parent command of this class it will return true, else false.
-     */
-    public boolean isParentCommand(PucmanCommand command)
-    {
-        return parentCommands.contains(command);
-    }
-
-    /**
-     * For adding child commands.
-     * @param commands - commands
-     */
-    public void addChildCommands(PucmanCommand... commands)
-    {
-        for (PucmanCommand command : commands) {
-            if (!isParentCommand(command) && !isChildCommand(command) && command != null) {
-                childCommands.add(command);
-                command.addParentCommands(this);
-            }
-        }
-    }
-
-    /**
-     * Checking if a command is a child command.
-     * @param command - command to check.
-     * @return if it is a child command of this class it will return true, else false.
-     */
-    public boolean isChildCommand(PucmanCommand command)
-    {
-        return childCommands.contains(command);
-    }
-
-    /**
-     * Check if the command is an alias of this command.
-     * @param alias - alias to check.
-     * @return true if it is, else false.
+     * TO check if a string is an alias of this command.
+     * @param alias - alias.
+     * @return yes if true, else false.
      */
     public boolean isAlias(String alias)
     {
-        return Arrays.asList(getAliases()).contains(alias) || alias.equals(getName());
+        return Arrays.asList(getAliases()).contains(alias);
     }
 
     /**
-     * To check if the player has the permission to execute this command.
-     * @param sender - the sender.
-     * @return true if they that have permission, else false.
+     * Is child command.
+     * @param child - child command to check.
+     * @return true is yes, else false.
      */
-    public boolean hasPermission(CommandSender sender)
+    public boolean isChild(PucmanCommand child)
     {
-        return getPermission() != null || sender.hasPermission(getPermission());
+        return childCommands.contains(child);
     }
 
     /**
-     * For checking if an argument field is required.
-     *
-     * @see ArgumentField
+     * Is parent command.
+     * @param parent - parent command to check.
+     * @return true if yes, else false.
+     */
+    public boolean isParent(PucmanCommand parent)
+    {
+        return parentCommands.contains(parent);
+    }
+
+    /**
+     * Adds an array of commands as a child to this command.
+     * @param commands
+     */
+    public void addChildren(PucmanCommand... commands)
+    {
+        for (PucmanCommand child : commands) {
+            if (isChild(child)) {
+                instance.getLogger().severe("Attempted to add command " + "{getcommandpath}" + " as a child when it already is a child of command " + "{getthiscommandpath}");
+                continue;
+            }
+
+            if (isParent(child)) {
+                instance.getLogger().severe("Attempted to add command " + "{getcommandpath}" + " as a child when it is already a parent of command " + "{getthiscommandpath}" + "!");
+                continue;
+            }
+
+            childCommands.add(child);
+            child.addParents(this);
+        }
+    }
+
+    /**
+     * Adds an array of commands as a parent to this command.
+     * @param commands
+     */
+    public void addParents(PucmanCommand... commands)
+    {
+        for (PucmanCommand parent : commands) {
+            if (isChild(parent)) {
+                instance.getLogger().severe("Attempted to add command " + "{getcommandpath}" + " as a parent when it already is a child of command " + "{getthiscommandpath}");
+                continue;
+            }
+
+            if (isParent(parent)) {
+                instance.getLogger().severe("Attempted to add command " + "{getcommandpath}" + " as a parent when it is already a parent of command " + "{getthiscommandpath}" + "!");
+                continue;
+            }
+
+
+            parentCommands.add(parent);
+            parent.addChildren(this);
+        }
+    }
+
+    /**
+     * To check if an argument field is a required or optional field.
      * @param field - field to check.
      * @return true if required, else false.
      */
     public boolean isRequiredArgumentField(ArgumentField field)
     {
-        return requiredArgumentFields.contains(field);
+        return requiredArguments.contains(field);
     }
 
     /**
-     * To generate the command path of this command. This generates the full path of the command.
-     * For example:
-     * /parentcommand thiscommand
-     * @return the command path.
+     * Gets the command path of this command.
+     * @return command path.
      */
     public String getCommandPath()
     {
-        LIB.debug(this, "Invoked getCommandPath()");
         StringBuilder sb = new StringBuilder("/");
 
         for (PucmanCommand parent : parentCommands) {
@@ -274,24 +206,21 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
             }
         }
 
-        LIB.debug(this, "Returning unary value getCommandPath().");
-        return sb.append(getName()).toString();
+        return sb.toString();
     }
 
     /**
-     * Generates the command usage. This takes the command path and adds all argument fields to the
-     * command. For example:
-     * /parentcommand this command <argument1> [argument2] [argument3]
-     * @return the command usage;
+     * Gets the command usage of this command.
+     * @return command usage.
      */
     public String getCommandUsage()
     {
         StringBuilder sb = new StringBuilder(getCommandPath()).append(" ");
 
-        for (ArgumentField field : argumentFields) {
-            sb.append(isRequiredArgumentField(field) ? "<" : "[").append(field.getName()).append(isRequiredArgumentField(field) ? ">" : "]");
+        for (ArgumentField field : requiredArguments) {
+            sb.append(isRequiredArgumentField(field) ? "[" : "<").append(field.getName()).append(isRequiredArgumentField(field) ? "]" : ">");
 
-            if (field != argumentFields.getLast()) {
+            if (field != requiredArguments.getLast()) {
                 sb.append(" ");
             }
         }
@@ -299,99 +228,67 @@ public abstract class PucmanCommand<T extends Plugin, T1> extends Command
         return sb.toString();
     }
 
-    /**
-     * Body of BungeeCord command.
-     * @param sender - sender.
-     * @param args - arguments.
-     */
     @Override
-    public final void execute(CommandSender sender, String[] args)
+    public void execute(CommandSender sender, String[] arguments)
     {
-
-        if (isPlayerOnlyCommand() && !(sender instanceof ProxiedPlayer)) {
-            LIB.debug(this, "Is player only command.");
+        if (playerOnlyCommand && !(sender instanceof ProxiedPlayer)) {
             Sender.send(sender, PLAYER_ONLY_COMMAND);
             return;
         }
 
-        if (!hasPermission(sender)) {
-            LIB.debug(this, "No permission.");
-            Sender.send(sender, NO_PERMISSION);
-            return;
-        }
-
-        if (args.length >= 1) {
-            LIB.debug(this, "Argument length is bigger or equal to 1.");
-            if (args[0].equalsIgnoreCase("help")) {
-                LIB.debug(this, "First argument is 'help'");
-                LinkedList<String> content = Lists.newLinkedList();
-
-                if (PARENT_COMMAND_HEADER == null) {
-                    LIB.debug(this, "PARENT_COMMAND_HEADER is null.");
-                }
-
-                content.add(PARENT_COMMAND_HEADER.replace("{commandusage}",
-                        getCommandUsage()).replace("{commanddescription}",
-                        getDescription()));
-
-                if (childCommands.size() > 0) {
-                    LIB.debug(this, "Invoked command has child commands.");
-                    content.add(CHILD_COMMAND_HEADER);
-
-                    for (PucmanCommand child : childCommands) {
-                        content.add(COMMAND_ENTRY.replace("{commandusage}", child.getCommandPath()).replace("{commanddescription}", child.getDescription()));
-                    }
-                }
-
-                LIB.debug(this, "Paginating.");
-                LinkedHashMap<Integer, String> pages = Format.paginate(content, null, null, 5);
-
-                if (args.length == 2 && NumberUtil.parseable(args[1], Integer.class)) {
-                    LIB.debug(this, "2 argument was found and parsable as an integer.");
-                    Sender.send(sender, pages.get(NumberUtil.parse(args[1], Integer.class)));
-                } else {
-                    LIB.debug("No second argument found, printing first page.");
-                    Sender.send(sender, pages.get(1));
-                }
+        if (arguments[0].equals("help")) {
+            if (!helpCmd) {
+                Sender.send(sender, HELP_COMMAND_NOT_ENABLED);
                 return;
             }
 
-            LIB.debug(this, "Checking if the second argument is a child command.");
-            if (childCommands.size() > 0) {
-                for (PucmanCommand child : childCommands) {
-                    if (!child.isAlias(args[0])) {
-                        LIB.debug(this, child.getName() + " is not the second argument.");
-                        continue;
-                    }
+            LinkedList<TextComponent> content = Lists.newLinkedList();
 
-                    LIB.debug(this, child.getName() + " is the second argument.");
-                    LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
-                    newArgs.remove(args[0]);
-                    LIB.debug(this, "Invoking constructor of command " + child.getName() + ".");
-                    child.execute(sender, newArgs.toArray(new String[newArgs.size()]));
-                    return;
-                }
+            for (PucmanCommand child : childCommands) {
+                TextComponent entry = new TextComponent(child.getCommandUsage());
+                entry.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[] {new TextComponent(child.getDescription())}));
+                content.add(entry);
             }
-        } else {
-            LIB.debug(this, "There are no arguments.");
+
+            Multimap<Integer, TextComponent> pages = Format.paginate(content, new TextComponent(HELP_LIST_CURRENT_COMMAND_HEADER.replace("{currentcommangusage}", getCommandUsage())), new TextComponent(HELP_LIST_CHILD_COMMANDS_HEADER), 10);
+
+            if (arguments.length == 2 && NumberUtil.parseable(arguments[1], Integer.class)) {
+                int page = NumberUtil.parse(arguments[1], Integer.class);
+                sender.sendMessage(pages.get(page).toArray(new TextComponent[pages.get(page).size()]));
+            } else {
+                sender.sendMessage(pages.get(1).toArray(new TextComponent[pages.get(1).size()]));
+            }
+
+            return;
         }
 
-        if (getRequiredArgumentFields().size() > args.length) {
-            LIB.debug("Required arguments not found.");
+        if (childCommands.size() > 1) {
+            for (PucmanCommand child : childCommands) {
+                if (!child.isAlias(arguments[0])) {
+                    continue;
+                }
+
+                LinkedList<String> args = Lists.newLinkedList(Arrays.asList(arguments));
+                args.remove(args.getFirst());
+                child.execute(sender, args.toArray(new String[args.size()]));
+                return;
+            }
+        }
+
+        if (arguments.length < requiredArguments.size()) {
             Sender.send(sender, NOT_ENOUGH_ARGUMENTS.replace("{commandusage}", getCommandUsage()));
             return;
         }
 
-        LinkedList<String> newArgs = Lists.newLinkedList(Arrays.asList(args));
-
-        LIB.debug(this, "Invoking main command body.");
-        execute(GenericUtil.cast(sender), newArgs);
+        LinkedList<String> args = Lists.newLinkedList(Arrays.asList(arguments));
+        args.remove(args.getFirst());
+        manager.getService().submit(() -> execute(GenericUtil.cast(sender), args));
     }
 
     /**
-     * Main body of the command.
-     * @param sender - the sender of the command.
-     * @param parameters - the parameters.
+     * This method definition will contain the main body of this command.
+     * @param sender - command sender.
+     * @param arguments - arguments.
      */
-    public abstract void execute(T1 sender, LinkedList<String> parameters);
+    public abstract void execute(T sender, LinkedList<String> arguments);
 }

@@ -2,7 +2,6 @@ package io.pucman.bungee.sender;
 
 import com.google.common.collect.Lists;
 import io.pucman.bungee.PLibrary;
-import io.pucman.bungee.locale.Format;
 import io.pucman.common.exception.UtilException;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.BaseComponent;
