@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 import io.pucman.bungee.PLibrary;
 import io.pucman.bungee.file.ConfigPopulate;
 import io.pucman.bungee.locale.Format;
-import io.pucman.bungee.plugin.LibPlugin;
+import io.pucman.bungee.manager.ManagingPlugin;
 import io.pucman.bungee.sender.Sender;
 import io.pucman.common.generic.GenericUtil;
 import io.pucman.common.math.NumberUtil;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * @param <T> - command sender.
  * @param <T1> - plugin this command belongs to.
  */
-public abstract class PucmanCommand<T, T1 extends LibPlugin> extends Command
+public abstract class PucmanCommand<T, T1 extends ManagingPlugin> extends Command
 {
     @ConfigPopulate(value = "Library.Command.PlayerOnlyCommand", format = true)
     private String PLAYER_ONLY_COMMAND;
@@ -300,5 +300,7 @@ public abstract class PucmanCommand<T, T1 extends LibPlugin> extends Command
      * Invoked when an exception occurs within the main body of this command.
      * @param t
      */
-    public abstract void exception(Throwable t);
+    public void exception(Throwable t)
+    {
+    }
 }

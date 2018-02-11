@@ -1,6 +1,8 @@
 package io.pucman.bungee.plugin;
 
 import io.pucman.bungee.PLibrary;
+import io.pucman.bungee.command.CommandManager;
+import io.pucman.bungee.command.PucmanCommand;
 import io.pucman.bungee.manager.ManagingPlugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 import net.md_5.bungee.api.scheduler.TaskScheduler;
