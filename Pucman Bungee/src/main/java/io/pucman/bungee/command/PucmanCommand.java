@@ -11,7 +11,6 @@ import io.pucman.common.generic.GenericUtil;
 import io.pucman.common.math.NumberUtil;
 import lombok.Getter;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -247,7 +246,7 @@ public abstract class PucmanCommand<T, T1 extends ManagingPlugin> extends Comman
 
             for (PucmanCommand child : childCommands) {
                 TextComponent entry = new TextComponent(child.getCommandUsage());
-                entry.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[] {new TextComponent(child.getDescription())}));
+                entry.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(child.getDescription())));
                 content.add(entry);
             }
 
@@ -302,5 +301,6 @@ public abstract class PucmanCommand<T, T1 extends ManagingPlugin> extends Comman
      */
     public void exception(Throwable t)
     {
+
     }
 }

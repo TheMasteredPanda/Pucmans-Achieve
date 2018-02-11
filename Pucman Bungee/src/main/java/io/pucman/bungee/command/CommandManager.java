@@ -22,6 +22,10 @@ public class CommandManager extends Manager<PLibrary>
         service = Executors.newFixedThreadPool(instance.getMainConfig().get(Integer.class, "Command.ThreadPoolSize"));
     }
 
+    /**
+     * Registers an array of commands.
+     * @param commands - commands to register.
+     */
     public void register(PucmanCommand... commands)
     {
         for (PucmanCommand command : commands) {
