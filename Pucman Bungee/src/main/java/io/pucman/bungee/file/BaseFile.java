@@ -8,6 +8,7 @@ import io.pucman.common.exception.TryUtil;
 import io.pucman.common.generic.GenericUtil;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -20,13 +21,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Wrapper for managing files,
  */
-@ParametersAreNonnullByDefault
 @Getter
+@ParametersAreNonnullByDefault
 public class BaseFile
 {
     private PLibrary lib = PLibrary.get();
@@ -35,6 +38,8 @@ public class BaseFile
     private File file;
     protected Configuration configuration;
     private Class<? extends ConfigurationProvider> provider;
+    private LinkedList<ReplacementEntry> replacementEntries = Lists.newLinkedList();
+    private Pattern node = Pattern.compile("");
 
     public BaseFile(Plugin instance, String name, File parent, Class<? extends ConfigurationProvider> provider)
     {
@@ -43,6 +48,16 @@ public class BaseFile
         file = new File(parent, name);
         this.provider = provider;
     }
+
+    /**
+     * Adds an array of replacement entries to the list.
+     * @param entries - replacement entries.
+     */
+    public void replacers(ReplacementEntry... entries)
+    {
+        replacementEntries.addAll(Arrays.asList(entries));
+    }
+
 
     /**
      * Loads the file, if the file is not present in the parent directory but has
@@ -98,6 +113,8 @@ public class BaseFile
                 continue;
             }
 
+            Class type = f.getType();
+
             lib.debug(this, f.getName() + " does have the correct annotation.");
 
             ConfigPopulate annotation = f.getAnnotation(ConfigPopulate.class);
@@ -111,7 +128,7 @@ public class BaseFile
 
             f.setAccessible(true);
 
-            if (!GenericUtil.castable(value, f.getType())) {
+            if (!GenericUtil.castable(value, type)) {
                 lib.debug(this, "Can't cast field type " + f.getName() + " do the value in the config.");
                 throw new DeveloperException("Value corresponding to key " + annotation.value() + " could not be assigned to field " + f.getName() + " as it's type, " + f.getType().getName() + " could not be casted to the value " + value.toString() + ".");
             }
@@ -119,10 +136,25 @@ public class BaseFile
             lib.debug(this, "Setting the field " + f.getName() + " accessible.");
             f.setAccessible(true);
 
-            if (f.getType().equals(String.class) && annotation.color()) {
-                lib.debug(this, "Setting the value as a string, colored, to field " + f.getName() + ".");
-                f.set(instance, Format.color(value));
-                continue;
+
+
+            if ((type.equals(String.class) || type.equals(TextComponent.class))) {
+                if (annotation.colour()) {
+                    lib.debug(this, "Setting the value as a string, colored, to field " + f.getName() + ".");
+                    f.set(instance, type.equals(TextComponent.class) ? TextComponent.fromLegacyText(Format.color(value)) : Format.color(value));
+                    continue;
+                }
+
+                if (annotation.format()) {
+                    String stringValue = Format.color(value);
+
+                    for (ReplacementEntry entry : replacementEntries) {
+                        stringValue = stringValue.replace(entry.getPlaceholder(), entry.getValue().toString());
+                    }
+
+                    f.set(instance, type.equals(TextComponent.class) ? TextComponent.fromLegacyText(stringValue) : stringValue);
+                    continue;
+                }
             }
 
             lib.debug(this, "Setting field " + f.getName() + ".");
