@@ -27,9 +27,9 @@ public class ModuleManager extends Manager<PLibrary>
     private TreeTraverser traverser = TreeTraverser.using(new DefaultModuleTraverserFunction(Manager.class));
     private ArrayList<Class<? extends Module>> cannotLoad = Lists.newArrayList();
 
-    public ModuleManager(PLibrary instance)
+    public ModuleManager()
     {
-        super(instance, Priority.HIGH);
+        super(PLibrary.get(), Priority.HIGH);
     }
 
     /**

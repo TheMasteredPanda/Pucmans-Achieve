@@ -16,9 +16,9 @@ public class CommandManager extends Manager<PLibrary>
     @Getter(AccessLevel.PROTECTED)
     private ExecutorService service;
 
-    public CommandManager(PLibrary instance)
+    public CommandManager()
     {
-        super(instance, Priority.HIGH);
+        super(PLibrary.get(), Priority.HIGH);
         service = Executors.newFixedThreadPool(instance.getMainConfig().get(Integer.class, "Command.ThreadPoolSize"));
     }
 
