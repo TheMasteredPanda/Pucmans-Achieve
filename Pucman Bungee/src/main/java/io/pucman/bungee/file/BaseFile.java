@@ -2,6 +2,7 @@ package io.pucman.bungee.file;
 
 import com.google.common.collect.Lists;
 import io.pucman.bungee.PLibrary;
+import io.pucman.bungee.file.provider.JsonProvider;
 import io.pucman.bungee.locale.Format;
 import io.pucman.common.exception.DeveloperException;
 import io.pucman.common.exception.TryUtil;
@@ -167,7 +168,7 @@ public class BaseFile
      */
     public synchronized void close()
     {
-        if (configuration != null && file != null) {
+        if (configuration != null && file != null && provider.equals(JsonProvider.class)) {
             TryUtil.sneaky(() -> ConfigurationProvider.getProvider(provider).save(configuration, file));
         }
     }
@@ -182,5 +183,15 @@ public class BaseFile
     public <T> T get(Class<T> type, String node)
     {
         return GenericUtil.cast(configuration.get(node), type);
+    }
+
+    /**
+     * Set a value in the config.
+     * @param node - node path.
+     * @param value - value.
+     */
+    public synchronized void set(String node, Object value)
+    {
+        configuration.set(node, value);
     }
 }
