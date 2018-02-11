@@ -19,6 +19,7 @@ import net.md_5.bungee.api.plugin.Command;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -282,7 +283,10 @@ public abstract class PucmanCommand<T, T1 extends LibPlugin> extends Command
 
         LinkedList<String> args = Lists.newLinkedList(Arrays.asList(arguments));
         args.remove(args.getFirst());
-        manager.getService().submit(() -> execute(GenericUtil.cast(sender), args));
+        CompletableFuture.runAsync(() -> execute(GenericUtil.cast(sender),  args.toArray(new String[args.size()])), manager.getService()).exceptionally(throwable -> {
+            exception(throwable);
+            return null;
+        });
     }
 
     /**
@@ -290,5 +294,11 @@ public abstract class PucmanCommand<T, T1 extends LibPlugin> extends Command
      * @param sender - command sender.
      * @param arguments - arguments.
      */
-    public abstract void execute(T sender, LinkedList<String> arguments);
+    public abstract void execute(T sender, LinkedList<String> arguments) throws Exception;
+
+    /**
+     * Invoked when an exception occurs within the main body of this command.
+     * @param t
+     */
+    public abstract void exception(Throwable t);
 }
