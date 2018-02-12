@@ -53,10 +53,10 @@ public abstract class PucmanCommand<T, T1 extends ManagingPlugin> extends Comman
     @ConfigPopulate(value = "Library.Command.HelpCommandNotEnabled", format = true)
     private String HELP_COMMAND_NOT_ENABLED;
 
-    @ConfigPopulate(value = "Library.Command.HelpList.CurrentCommandHeader", color = true)
+    @ConfigPopulate(value = "Library.Command.HelpList.CurrentCommandHeader", colour = true)
     private String HELP_LIST_CURRENT_COMMAND_HEADER;
 
-    @ConfigPopulate(value = "Library.Command.HelpList.ChildCommandHeader", color = true)
+    @ConfigPopulate(value = "Library.Command.HelpList.ChildCommandHeader", colour = true)
     private String HELP_LIST_CHILD_COMMANDS_HEADER;
 
     @ConfigPopulate(value = "Library.Command.PlayerNotFound", format = true)

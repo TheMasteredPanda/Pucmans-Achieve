@@ -1,0 +1,14 @@
+Library:
+  Command:
+    #Size of the thread pool used to execute commands asynchronously.
+    ThreadPoolSize: 50
+    PlayerOnlyCommand: "&cPlayer only command."
+    IncorrectArgumentDataType: "{commandprefix} &cThe argument {argument} got a {inputtedtype} instead of a {requiredtype}."
+    NotEnoughArguments: "{commandprefix} &cNot enough arguments were inputted for {commandpath} to execute successfully."
+    CommandNotFound: "{commandprefix} &cCommand not found. {helpcommand}."
+    HelpList:
+      ListEntry: "&8» &a{commandusage}"
+      CurrentCommandHeader: "&aParent Command&8:\n» &a{commandusage}"
+      ChildCommandHeader: "&aChild Commands&8:"
+    HelpCommandNotEnabled: "{commandprefix} &cThe help command is not enabled on this command. To get the necessary information for this command execute {helpcommand}."
+    PlayerNotFound: "{commandprefix} &cPlayer {playername} was not found."

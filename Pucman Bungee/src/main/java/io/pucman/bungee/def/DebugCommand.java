@@ -16,7 +16,7 @@ public class DebugCommand extends PucmanCommand<CommandSender, PLibrary>
     }
 
     @Override
-    public void execute(CommandSender sender, LinkedList<String> arguments) throws Exception
+    public void execute(CommandSender sender, LinkedList<String> arguments)
     {
         PLibrary.get().getDebug().set(!PLibrary.get().getDebug().get());
 

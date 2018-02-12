@@ -19,7 +19,7 @@ public class CommandManager extends Manager<PLibrary>
     public CommandManager(PLibrary instance)
     {
         super(instance, Priority.HIGH);
-        service = Executors.newFixedThreadPool(instance.getMainConfig().get(Integer.class, "Command.ThreadPoolSize"));
+        service = Executors.newFixedThreadPool(instance.getMainConfig().get(Integer.class, "Library.Command.ThreadPoolSize"));
     }
 
     /**
