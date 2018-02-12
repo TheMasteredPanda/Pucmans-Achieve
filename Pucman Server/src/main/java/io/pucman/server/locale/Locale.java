@@ -18,8 +18,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -113,7 +111,7 @@ public class Locale<P extends JavaPlugin> extends BaseFile
                 throw new DeveloperException("Key " + annotation.value() + ". Was not found in file " + this.getName() + ".");
             }
 
-            if (!GenericUtil.caseable(value, f.getType())) {
+            if (!GenericUtil.castable(value, f.getType())) {
                 throw new DeveloperException("Value corresponding to key " + annotation.value() + " could not be assigned to field " + f.getName() + " as it's type, " + f.getType().getName() + " could not be casted to the value " + value.toString() + ".");
             }
 

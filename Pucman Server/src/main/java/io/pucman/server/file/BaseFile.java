@@ -90,7 +90,7 @@ public class BaseFile
                 throw new DeveloperException("Key " + annotation.value() + ". Was not found in file " + this.name + ".");
             }
 
-            if (!GenericUtil.caseable(value, f.getType())) {
+            if (!GenericUtil.castable(value, f.getType())) {
                 throw new DeveloperException("Value corresponding to key " + annotation.value() + " could not be assigned to field " + f.getName() + " as it's type, " + f.getType().getName() + " could not be casted to the value " + value.toString() + ".");
             }
 

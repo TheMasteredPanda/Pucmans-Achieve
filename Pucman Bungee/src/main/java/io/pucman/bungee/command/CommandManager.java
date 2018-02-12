@@ -38,7 +38,7 @@ public class CommandManager extends Manager<PLibrary>
                 file.populate(command);
             }
 
-            instance.getPluginManager().registerCommand(instance, command);
+            instance.getPluginManager().registerCommand(command.getInstance(), command);
             instance.getLogger().info("Registered command " + command.getCommandPath() + ".");
         }
     }

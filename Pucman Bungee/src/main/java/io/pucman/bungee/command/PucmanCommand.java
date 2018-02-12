@@ -62,6 +62,7 @@ public abstract class PucmanCommand<T, T1 extends ManagingPlugin> extends Comman
     @ConfigPopulate(value = "Library.Command.PlayerNotFound", format = true)
     private String PLAYER_NOT_FOUND;
 
+    @Getter
     protected T1 instance;
 
     private CommandManager manager = PLibrary.get().get(CommandManager.class);
