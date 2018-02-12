@@ -92,7 +92,12 @@ public abstract class PucmanCommand<T, T1 extends ManagingPlugin> extends Comman
         this.description = description;
         this.playerOnlyCommand = playerOnlyCommand;
         this.helpCmd = helpCmd;
-        PLibrary.get().getMainConfig().populate(this);
+
+        if (PLibrary.get().getMainConfig() != null) {
+            PLibrary.get().getMainConfig().populate(this);
+        } else {
+            instance.getLogger().warning("PLibrary doesn't seem to have a config.yml so we couldn't populate the values in PucmanCommand.");
+        }
     }
 
     /**
