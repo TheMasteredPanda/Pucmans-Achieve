@@ -24,7 +24,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Wrapper for managing files,
@@ -40,7 +39,6 @@ public class BaseFile
     protected Configuration configuration;
     private Class<? extends ConfigurationProvider> provider;
     private LinkedList<ReplacementEntry> replacementEntries = Lists.newLinkedList();
-    private Pattern node = Pattern.compile("");
 
     public BaseFile(Plugin instance, String name, File parent, Class<? extends ConfigurationProvider> provider)
     {
