@@ -87,9 +87,10 @@ public abstract class PucmanCommand<T, T1 extends ManagingPlugin> extends Comman
 
     private boolean helpCmd;
 
-    public PucmanCommand(String mainAlias, String permission, String description, boolean playerOnlyCommand, boolean helpCmd, String... aliases)
+    public PucmanCommand(T1 instance, String mainAlias, String permission, String description, boolean playerOnlyCommand, boolean helpCmd, String... aliases)
     {
         super(mainAlias, permission, aliases);
+        this.instance = instance;
         this.description = description;
         this.playerOnlyCommand = playerOnlyCommand;
         this.helpCmd = helpCmd;
@@ -99,6 +100,16 @@ public abstract class PucmanCommand<T, T1 extends ManagingPlugin> extends Comman
         } else {
             instance.getLogger().warning("PLibrary doesn't seem to have a config.yml so we couldn't populate the values in PucmanCommand.");
         }
+    }
+
+    public PucmanCommand(T1 instance, String mainAlias, String permission, String description, boolean playerOnlyCommand)
+    {
+        this(instance, mainAlias, permission, description, playerOnlyCommand, false);
+    }
+
+    public PucmanCommand(T1 instance, String mainAlias, String description, boolean playerOnlyCommand)
+    {
+        this(instance, mainAlias, null, description, playerOnlyCommand, false);
     }
 
     /**
